@@ -1,0 +1,267 @@
+﻿@page "/weatherdashboard"
+@inject Weatherfrontend.Services.FavoritesService FavoritesService
+@inject Weatherfrontend.Services.AuthState AuthState
+@inject HttpClient Http
+
+<div class="dashboard-container">
+
+    <!-- Title + subtitle (Upgrade #7) -->
+    <div class="animate-fade-in">
+        <h1 class="dashboard-title">🌤 Weather Dashboard</h1>
+        <div class="dashboard-subtitle">View your favorites & explore forecasts</div>
+    </div>
+
+    <!-- Favorites chips (Upgrade #8) -->
+    <div class="glass-card favorites-box animate-pop-in">
+        <h3>Your Favorites</h3>
+
+        @if (favoriteCities.Count == 0)
+        {
+            <div class="no-fav">(No favorites yet)</div>
+        }
+        else
+        {
+            <div class="fav-chip-container">
+                @foreach (var fav in favoriteCities)
+                {
+                    <div class="fav-chip">
+                        <button class="fav-city" @onclick="() => OnFavoriteClick(fav)">@fav</button>
+                        <span class="fav-remove" @onclick="() => RemoveFavorite(fav)">✕</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Centered pill search (Upgrade #4) -->
+    <div class="search-hero animate-fade-in">
+        <input class="search-input" @bind="city" placeholder="Enter city name..." />
+        <button class="btn-search" @onclick="GetWeather">Search</button>
+        <button class="btn-fav" @onclick="AddFavorite">Add Fav</button>
+    </div>
+
+    @if (currentWeather != null)
+    {
+        <!-- Dynamic hero with overlay (Upgrade #3) -->
+        <div class="dashboard-hero animate-hero"
+             style="background-image:
+                        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                        url('@GetWeatherBackgroundImage()');">
+
+            <div class="hero-left">
+                <h1>@currentWeather.City</h1>
+                <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
+
+                <div class="hero-info-row">
+                    <div class="hero-info-pill">Wind @currentWeather.WindSpeed m/s</div>
+                    <div class="hero-info-pill">@currentWeather.Description</div>
+                </div>
+            </div>
+
+            <div class="hero-today">
+                <img src="@($"https://openweathermap.org/img/wn/{currentWeather.IconId}@2x.png")" />
+                <div class="temp">@currentWeather.Temp°C</div>
+            </div>
+        </div>
+
+        <!-- Forecast (keeps your existing forecast styles, adds animation #6) -->
+        <h3 class="forecast-title">5-Day Forecast</h3>
+        <div class="forecast-grid">
+            @foreach (var day in forecastList)
+            {
+                <div class="forecast-card animate-pop-in">
+                    <div class="forecast-date">@day.Date.ToString("ddd")</div>
+                    <img src="@($"https://openweathermap.org/img/wn/{day.IconId}@2x.png")" width="60" />
+                    <div class="forecast-temp">@day.Temp°C</div>
+                    <div class="forecast-desc">@day.Description</div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(popupMessage))
+{
+    <div class="popup">@popupMessage</div>
+}
+
+@code {
+    private string city = "";
+    private WeatherData? currentWeather;
+    private List<ForecastData> forecastList = new();
+    private List<string> favoriteCities = new();
+    private string? popupMessage;
+
+    private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(AuthState.UserId))
+            favoriteCities = await FavoritesService.GetFavoritesAsync();
+    }
+
+    private async Task GetWeather()
+    {
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            ShowPopup("⚠️ Enter a city name first!");
+            return;
+        }
+
+        await GetCurrentWeather();
+        await GetForecast();
+    }
+
+    private async Task GetCurrentWeather()
+    {
+        try
+        {
+            var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={ApiKey}&units=metric";
+            var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
+
+            if (data != null)
+            {
+                currentWeather = new WeatherData
+                {
+                    City = data.Name,
+                    Temp = data.Main.Temp,
+                    Description = data.Weather[0].Description,
+                    IconId = data.Weather[0].Icon,
+                    WindSpeed = data.Wind.Speed,
+                    Main = data.Weather[0].Main
+                };
+            }
+        }
+        catch
+        {
+            ShowPopup("❌ City not found");
+            currentWeather = null;
+            forecastList.Clear();
+        }
+    }
+
+    private async Task GetForecast()
+    {
+        try
+        {
+            var url = $"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={ApiKey}&units=metric";
+            var forecast = await Http.GetFromJsonAsync<ForecastApiResponse>(url);
+
+            forecastList = forecast?.List
+                .Where((x, i) => i % 8 == 0)
+                .Take(5)
+                .Select(x => new ForecastData
+                {
+                    Date = DateTime.Parse(x.Dt_txt),
+                    Temp = x.Main.Temp,
+                    Description = x.Weather[0].Description,
+                    IconId = x.Weather[0].Icon
+                })
+                .ToList() ?? new();
+        }
+        catch
+        {
+            forecastList.Clear();
+        }
+    }
+
+    // Dynamic background from your /wwwroot/images/weather folder
+    private string GetWeatherBackgroundImage()
+    {
+        if (currentWeather == null) return "/images/weather/cloudy.jpg";
+
+        var desc = (currentWeather.Description ?? "").ToLowerInvariant();
+        var main = (currentWeather.Main ?? "").ToLowerInvariant();
+
+        if (desc.Contains("rain") || main == "rain" || main == "drizzle") return "/images/weather/rainy.jpg";
+        if (desc.Contains("cloud") || main == "clouds") return "/images/weather/cloudy.jpg";
+        if (desc.Contains("clear") || main == "clear" || desc.Contains("sun")) return "/images/weather/sunny.jpg";
+        if (desc.Contains("snow") || main == "snow") return "/images/weather/snowy.jpg";
+        if (desc.Contains("fog") || desc.Contains("mist") || desc.Contains("haze")) return "/images/weather/foggy.jpg";
+        if (desc.Contains("storm") || desc.Contains("thunder") || main == "thunderstorm") return "/images/weather/storm.jpg";
+
+        return "/images/weather/cloudy.jpg";
+    }
+
+    private async Task AddFavorite()
+    {
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            ShowPopup("⚠️ Enter a city first!");
+            return;
+        }
+
+        var ok = await FavoritesService.AddFavoriteAsync(city);
+        if (ok)
+        {
+            ShowPopup($"✅ Added {city}");
+            favoriteCities = await FavoritesService.GetFavoritesAsync();
+        }
+        else
+        {
+            ShowPopup("❌ Failed to add favorite");
+        }
+    }
+
+    private async Task RemoveFavorite(string fav)
+    {
+        var ok = await FavoritesService.RemoveFavoriteAsync(fav);
+        if (ok)
+        {
+            ShowPopup($"🗑 Removed {fav}");
+            favoriteCities = await FavoritesService.GetFavoritesAsync();
+        }
+    }
+
+    private async Task OnFavoriteClick(string fav)
+    {
+        city = fav;
+        await GetWeather();
+        await GetForecast();
+    }
+
+    private void ShowPopup(string message)
+    {
+        popupMessage = message;
+        StateHasChanged();
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(2500);
+            popupMessage = null;
+            StateHasChanged();
+        });
+    }
+
+    /* Models */
+    private class WeatherData
+    {
+        public string City { get; set; } = "";
+        public double Temp { get; set; }
+        public string Description { get; set; } = "";
+        public string IconId { get; set; } = "";
+        public double WindSpeed { get; set; }
+        public string Main { get; set; } = "";
+    }
+
+    private class ForecastData
+    {
+        public DateTime Date { get; set; }
+        public double Temp { get; set; }
+        public string Description { get; set; } = "";
+        public string IconId { get; set; } = "";
+    }
+
+    private class WeatherApiResponse
+    {
+        public string Name { get; set; } = "";
+        public MainData Main { get; set; } = new();
+        public List<WeatherCondition> Weather { get; set; } = new();
+        public WindData Wind { get; set; } = new();
+    }
+    private class ForecastApiResponse { public List<ForecastItem> List { get; set; } = new(); }
+    private class ForecastItem { public MainData Main { get; set; } = new(); public List<WeatherCondition> Weather { get; set; } = new(); public string Dt_txt { get; set; } = ""; }
+    private class MainData { public double Temp { get; set; } }
+    private class WeatherCondition { public string Main { get; set; } = ""; public string Description { get; set; } = ""; public string Icon { get; set; } = ""; }
+    private class WindData { public double Speed { get; set; } }
+}

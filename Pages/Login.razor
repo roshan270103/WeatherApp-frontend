@@ -1,0 +1,64 @@
+﻿@page "/login"
+@using Weatherfrontend.Services
+@inject AuthState authState
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+
+        <h2>Welcome Back 👋</h2>
+        <p class="auth-subtitle">Login to continue to your weather dashboard</p>
+
+        <input class="auth-input" @bind="email" placeholder="Email" />
+        <input class="auth-input" @bind="password" type="password" placeholder="Password" />
+
+        <button class="auth-btn" @onclick="LoginUser">Login</button>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p style="margin-top:15px; color:#fff;">@message</p>
+        }
+    </div>
+</div>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string message = "";
+
+    private async Task LoginUser()
+    {
+        var user = new { email = email, password = password };
+        var response = await Http.PostAsJsonAsync("https://localhost:7041/api/user/login", user);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<UserInfo>();
+
+            if (result != null && !string.IsNullOrEmpty(result.id))
+            {
+                await authState.LoginAsync(result.id, result.email, result.accessToken);
+                NavigationManager.NavigateTo("/weatherdashboard", true);
+
+            }
+            else
+            {
+                message = "Login failed: Missing user ID or email.";
+            }
+        }
+        else
+        {
+            var errorMsg = await response.Content.ReadAsStringAsync();
+            message = $"Login failed: {errorMsg}";
+        }
+    }
+
+    public class UserInfo
+    {
+        public string id { get; set; } = "";
+        public string email { get; set; } = "";
+        public string accessToken { get; set; } = "";
+    }
+}

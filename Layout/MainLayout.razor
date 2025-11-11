@@ -1,0 +1,68 @@
+﻿@inherits LayoutComponentBase
+@inject Weatherfrontend.Services.WeatherService WeatherService
+@inject IJSRuntime JS
+
+<!-- ✅ Weather Animation Overlay (Rain, Snow, Thunder) -->
+<div class="@GetWeatherAnimationClass()"
+     style="position: fixed; top:0; left:0; width:100%; height:100%;
+            pointer-events:none; z-index:1;">
+</div>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        @Body
+    </main>
+</div>
+
+@code {
+
+    /* ✅ When the layout re-renders, update the <body> class
+       so your animated LIGHT background applies */
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!string.IsNullOrEmpty(WeatherService.CurrentMain))
+        {
+            var bgClass = GetWeatherBackgroundClass();
+            await JS.InvokeVoidAsync("setBodyClass", bgClass);
+        }
+    }
+
+    /* ✅ BODY BACKGROUND: Light animated gradients */
+    private string GetWeatherBackgroundClass()
+    {
+        var main = WeatherService.CurrentMain?.ToLowerInvariant() ?? "";
+
+        return main switch
+        {
+            "clear" => "weather-animate-clear",
+            "clouds" => "weather-animate-clouds",
+            "rain" => "weather-animate-rain",
+            "drizzle" => "weather-animate-drizzle",
+            "snow" => "weather-animate-snow",
+            "thunderstorm" => "weather-animate-thunderstorm",
+            _ => "weather-animate-default"
+        };
+    }
+
+    /* ✅ OVERLAY ANIMATION (Rain, Snow, Thunder particles) */
+    private string GetWeatherAnimationClass()
+    {
+        if (string.IsNullOrWhiteSpace(WeatherService.CurrentMain))
+            return "";
+
+        var main = WeatherService.CurrentMain.ToLowerInvariant();
+
+        return main switch
+        {
+            "rain" => "rain",
+            "drizzle" => "rain",
+            "snow" => "snow",
+            "thunderstorm" => "thunder",
+            _ => ""
+        };
+    }
+}

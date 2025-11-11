@@ -1,0 +1,49 @@
+﻿@using Weatherfrontend.Services
+@inject AuthState AuthState
+
+<CascadingAuthenticationState>
+    @if (!isLoaded)
+    {
+        <!-- Show splash or nothing while auth loads -->
+        <div style="color:white; padding:20px;">Loading...</div>
+    }
+    else
+    {
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                @if (AuthState.IsLoggedIn
+                    || routeData.PageType == typeof(Pages.Home)
+                    || routeData.PageType == typeof(Pages.Login)
+                    || routeData.PageType == typeof(Pages.Register))
+                {
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                }
+                else
+                {
+                    <LayoutView Layout="@typeof(MainLayout)">
+                        <div class="text-center mt-5" style="color:white;">
+                            <h4>🔒 You must be logged in to access this page.</h4>
+                            <p>Please log in from the navigation menu.</p>
+                        </div>
+                    </LayoutView>
+                }
+            </Found>
+
+            <NotFound>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p role="alert" style="color:white;">Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    }
+</CascadingAuthenticationState>
+
+@code {
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.LoadStateAsync();
+        isLoaded = true;
+    }
+}

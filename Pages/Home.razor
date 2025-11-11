@@ -1,0 +1,153 @@
+﻿@page "/"
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<!-- ✅ Welcome / Search section (before results) -->
+@if (weather == null)
+{
+    <div class="welcome-section animate-fade-in">
+        <h1 class="welcome-title">Welcome 👋</h1>
+        <p class="welcome-subtitle">Check your weather instantly for any city worldwide</p>
+
+        <div class="search-center-row">
+            <input class="weather-input" @bind="city" placeholder="Enter city..." />
+            <button class="weather-btn" @onclick="GetWeather">Search</button>
+        </div>
+    </div>
+}
+
+@if (weather != null)
+{
+    <!-- ✅ Full Premium Hero Section (Option B) -->
+    <div class="weather-hero animate-hero"
+         style="background-image:
+                    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                    url('@GetWeatherBackgroundImage()');">
+
+        <div>
+            <h1 style="font-size:2.4rem;">@weather.name</h1>
+
+            <!-- ✅ Readable date -->
+            <div class="weather-hero-date">
+                @DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")
+            </div>
+
+            <div class="weather-info-row">
+                <div class="weather-info-card">Wind @weather.wind.speed m/s</div>
+                <div class="weather-info-card">@weather.weather[0].description</div>
+            </div>
+        </div>
+
+        <div class="weather-today-card">
+            <img src="@($"https://openweathermap.org/img/wn/{weather.weather[0].icon}@2x.png")" />
+            <div class="weather-today-temp">@weather.main.temp°C</div>
+        </div>
+    </div>
+
+    <!-- ✅ Search bar inside results (matches dashboard) -->
+    <div class="search-hero animate-fade-in">
+        <input class="search-input" @bind="city" placeholder="Search another city..." />
+        <button class="btn-search" @onclick="GetWeather">Search</button>
+    </div>
+}
+
+@if (forecastDays != null && forecastDays.Any())
+{
+    <h3 class="forecast-title animate-fade-in">3-Day Forecast</h3>
+
+    <div class="forecast-grid">
+        @foreach (var day in forecastDays)
+        {
+            <div class="forecast-card animate-pop-in">
+                <img src="@($"https://openweathermap.org/img/wn/{day.Icon}@2x.png")" />
+                <div class="forecast-date">@day.Date.ToString("ddd")</div>
+                <div class="forecast-temp">@day.MinTemp°C – @day.MaxTemp°C</div>
+                <div class="forecast-desc">@day.Description</div>
+            </div>
+        }
+    </div>
+}
+
+@if (error != null)
+{
+    <div class="error-message">@error</div>
+}
+
+@code {
+    private string? city;
+    private WeatherResponse? weather;
+    private List<ForecastDay> forecastDays = new();
+    private string? error;
+
+    /* ✅ Dynamic hero background */
+    private string GetWeatherBackgroundImage()
+    {
+        if (weather?.weather == null || weather.weather.Count == 0)
+            return "/images/weather/sunny.jpg";
+
+        var desc = weather.weather[0].description.ToLower();
+
+        if (desc.Contains("rain")) return "/images/weather/rainy.jpg";
+        if (desc.Contains("cloud")) return "/images/weather/cloudy.jpg";
+        if (desc.Contains("snow")) return "/images/weather/snowy.jpg";
+        if (desc.Contains("storm") || desc.Contains("thunder")) return "/images/weather/storm.jpg";
+        if (desc.Contains("fog") || desc.Contains("mist") || desc.Contains("haze")) return "/images/weather/foggy.jpg";
+
+        return "/images/weather/sunny.jpg";
+    }
+
+    /* ✅ Fetch weather + forecast */
+    private async Task GetWeather()
+    {
+        error = null;
+        weather = null;
+        forecastDays.Clear();
+
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            error = "Please enter a city!";
+            return;
+        }
+
+        try
+        {
+            var weatherUrl = $"https://localhost:7041/api/weather?city={city}";
+            var forecastUrl = $"https://localhost:7041/api/weather/forecast?city={city}";
+
+            weather = await Http.GetFromJsonAsync<WeatherResponse>(weatherUrl);
+            forecastDays = await Http.GetFromJsonAsync<List<ForecastDay>>(forecastUrl);
+        }
+        catch (Exception ex)
+        {
+            error = $"Error: {ex.Message}";
+        }
+    }
+
+    /* ✅ Models */
+    public class WeatherResponse
+    {
+        public string name { get; set; }
+        public Main main { get; set; }
+        public List<WeatherInfo> weather { get; set; }
+        public Wind wind { get; set; }
+    }
+
+    public class Main { public double temp { get; set; } }
+
+    public class WeatherInfo
+    {
+        public string description { get; set; }
+        public string icon { get; set; }
+    }
+
+    public class Wind { public double speed { get; set; } }
+
+    public class ForecastDay
+    {
+        public DateTime Date { get; set; }
+        public double MinTemp { get; set; }
+        public double MaxTemp { get; set; }
+        public string Icon { get; set; }
+        public string Description { get; set; }
+    }
+}

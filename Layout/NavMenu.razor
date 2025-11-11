@@ -1,0 +1,54 @@
+﻿@using Weatherfrontend.Services
+@inject AuthState authState
+@inject NavigationManager Nav
+
+
+<div class="sidebar-container animate-sidebar">
+
+    <!-- App Logo -->
+    <div class="sidebar-logo">
+        🌦 Weatherfront
+    </div>
+
+    <nav class="sidebar-menu">
+
+        <NavLink class="sidebar-item" href="" Match="NavLinkMatch.All">
+            <i class="bi bi-house-door-fill"></i>
+            Home
+        </NavLink>
+
+        @if (!authState.IsLoggedIn)
+        {
+            <NavLink class="sidebar-item" href="register">
+                <i class="bi bi-person-plus"></i>
+                Register
+            </NavLink>
+
+            <NavLink class="sidebar-item" href="login">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Login
+            </NavLink>
+        }
+        else
+        {
+            <NavLink class="sidebar-item" href="weatherdashboard">
+                <i class="bi bi-cloud-sun"></i>
+                Dashboard
+            </NavLink>
+
+            <button class="sidebar-item sidebar-logout" @onclick="LogoutAsync">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </button>
+
+        }
+    </nav>
+</div>
+
+@code {
+    private async Task LogoutAsync()
+    {
+        await authState.LogoutAsync();
+        Nav.NavigateTo("/", true);
+    }
+}

@@ -1,0 +1,880 @@
+﻿/* ================================
+   GLOBAL BACKGROUND
+   ================================ */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    overflow-x: hidden;
+}
+
+/* ✅ Deep modern gradient like the example */
+body {
+    background: linear-gradient(180deg, #1d2b64 0%, #1d2b64 40%, #5a60f5 100%);
+    background-attachment: fixed;
+    color: #fff;
+}
+
+/* ================================
+   MAIN HERO SECTION
+   ================================ */
+
+.weather-hero {
+    width: 100%;
+    max-width: 1200px;
+    height: 270px;
+    margin: 40px auto;
+    border-radius: 26px;
+    padding: 38px;
+    color: white;
+    /* ✅ Aurora background (place image inside wwwroot/images/) */
+    background: url("/images/aurora.jpg") no-repeat center/cover;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 25px 45px rgba(0,0,0,0.35);
+}
+
+/* ================================
+   TODAY WEATHER CARD (RIGHT SIDE)
+   ================================ */
+
+.weather-today-card {
+    width: 210px;
+    padding: 24px;
+    border-radius: 22px;
+    background: #4d4ff4;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.40);
+}
+
+    .weather-today-card img {
+        width: 105px;
+        margin-bottom: 10px;
+    }
+
+.weather-today-temp {
+    font-size: 2.4rem;
+    font-weight: bold;
+}
+
+/* ================================
+   MINI INFO CARDS
+   ================================ */
+
+.weather-info-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.weather-info-card {
+    background: rgba(255,255,255,0.18);
+    padding: 12px 18px;
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    font-size: 0.9rem;
+    width: 150px;
+}
+
+/* ================================
+   FORECAST CARDS
+   ================================ */
+
+.forecast-container {
+    margin: 30px auto;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.forecast-card {
+    background: white;
+    width: 150px;
+    border-radius: 22px;
+    padding: 20px;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+}
+
+    .forecast-card img {
+        width: 65px;
+        margin-bottom: 10px;
+    }
+
+.forecast-day {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #fff;
+}
+
+.forecast-temp {
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+/* ================================
+   SEARCH BAR SECTION
+   ================================ */
+
+.search-row {
+    margin: 20px auto;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.weather-input {
+    padding: 14px;
+    border-radius: 12px;
+    width: 280px;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+}
+
+.weather-btn {
+    padding: 14px 22px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    .weather-btn:hover {
+        transform: scale(1.05);
+        transition: 0.2s ease;
+    }
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+
+@media (max-width: 850px) {
+    .weather-hero {
+        flex-direction: column;
+        height: auto;
+        text-align: center;
+        padding: 30px;
+    }
+}
+/* ================================
+   Premium Sidebar Design
+   ================================ */
+
+/* ================================
+   Premium Sidebar
+   ================================ */
+
+.sidebar-container {
+    width: 240px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255,255,255,0.12);
+    padding: 28px 20px;
+    box-sizing: border-box;
+}
+
+.sidebar-logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: .6px;
+    margin-bottom: 28px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Sidebar Link */
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #ffffff;
+    opacity: 0.85;
+    font-size: 1rem;
+    transition: 0.25s ease;
+}
+
+    /* Icons */
+    .sidebar-item i {
+        font-size: 1.25rem;
+    }
+
+    /* Hover */
+    .sidebar-item:hover {
+        opacity: 1;
+        background: rgba(255,255,255,0.26);
+        transform: translateX(4px);
+    }
+
+    /* Active Link Highlight */
+    .sidebar-item.active {
+        background: linear-gradient(135deg, #6c63ff, #8f6fff);
+        opacity: 1;
+        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+    }
+/* ================================
+   Welcome / Search Center Section
+   ================================ */
+
+.welcome-section {
+    text-align: center;
+    margin-top: 70px;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.welcome-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.85;
+    margin-bottom: 25px;
+}
+
+/* Centered search bar row */
+.search-center-row {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    max-width: 600px;
+}
+
+    .search-center-row .weather-input {
+        flex: 1;
+    }
+.weather-hero-date {
+    color: rgba(255,255,255,0.95);
+    font-size: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.45);
+    margin-bottom: 12px;
+}
+/* ================================
+   Premium Glass Auth Containers
+   ================================ */
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding-top: 60px;
+}
+
+.auth-card {
+    width: 420px;
+    padding: 38px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.22);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.18);
+    color: #1c1c1e;
+    text-align: center;
+}
+
+    .auth-card h2 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+.auth-subtitle {
+    font-size: 1rem;
+    opacity: 0.85;
+    color: #fff;
+    margin-bottom: 25px;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    outline: none;
+    font-size: 1rem;
+}
+
+    .auth-input::placeholder {
+        color: rgba(255,255,255,0.75);
+    }
+
+.auth-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 1.1rem;
+    transition: 0.25s ease;
+}
+
+    .auth-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+    }
+/* MAIN DASHBOARD WRAPPER */
+.dashboard-container {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+}
+
+/* TITLES */
+.dashboard-title {
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.dashboard-subtitle {
+    opacity: 0.8;
+    margin-bottom: 2rem;
+}
+
+/* GLASS CARDS */
+.glass-card {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.section-title {
+    margin-bottom: 1rem;
+}
+
+/* FAVORITES */
+.favorites-list {
+    padding: 0;
+    list-style: none;
+    margin-top: 1rem;
+}
+
+.favorite-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .8rem 1rem;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    margin-bottom: .8rem;
+    backdrop-filter: blur(8px);
+}
+
+.fav-city {
+    border: none;
+    background: none;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.btn-remove {
+    background: #ff4444;
+    border: none;
+    padding: .4rem .8rem;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    font-size: .9rem;
+}
+
+/* SEARCH UI */
+.search-row {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    padding: .8rem 1rem;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+}
+
+.btn-search {
+    background: #4ac4ff;
+    border: none;
+    padding: .8rem 1.2rem;
+    border-radius: 12px;
+    color: black;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-favorite {
+    background: #8affc1;
+    border: none;
+    padding: .8rem 1.1rem;
+    border-radius: 12px;
+    color: black;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* CURRENT WEATHER */
+.weather-today-card {
+    text-align: center;
+}
+
+.today-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.today-temp {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-top: .5rem;
+}
+
+.today-desc {
+    opacity: 0.9;
+}
+
+/* FORECAST GRID */
+.forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.forecast-item {
+    background: rgba(255,255,255,0.2);
+    padding: 1rem;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.forecast-temp {
+    margin-top: .5rem;
+    font-size: 1.2rem;
+}
+/* =====================================================
+   WEATHER DASHBOARD — HERO SECTION (Matches Home UI)
+   ===================================================== */
+
+.dashboard-hero {
+    width: 100%;
+    max-width: 1200px;
+    height: 260px;
+    margin: 40px auto;
+    padding: 38px;
+    border-radius: 26px;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 22px 40px rgba(0,0,0,0.35);
+}
+
+    /* Left content inside dashboard hero */
+    .dashboard-hero .hero-left {
+        max-width: 60%;
+    }
+
+    .dashboard-hero h1 {
+        font-size: 2.4rem;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .dashboard-hero .hero-date {
+        opacity: 0.9;
+        font-size: 1rem;
+        margin-bottom: 14px;
+    }
+
+.hero-info-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.hero-info-pill {
+    padding: 10px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.20);
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+}
+
+/* Right temperature card */
+.dashboard-hero .hero-today {
+    width: 210px;
+    padding: 24px;
+    background: #4d4ff4;
+    text-align: center;
+    border-radius: 22px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+
+    .dashboard-hero .hero-today img {
+        width: 105px;
+        margin-bottom: 10px;
+    }
+
+    .dashboard-hero .hero-today .temp {
+        font-size: 2.4rem;
+        font-weight: 700;
+    }
+
+/* =====================================================
+   FAVORITES — Modern "chips" style
+   ===================================================== */
+
+.favorites-box {
+    margin-top: 30px;
+    margin-bottom: 25px;
+}
+
+    .favorites-box h3 {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+
+.no-fav {
+    opacity: 0.7;
+    margin-left: 5px;
+}
+
+.fav-chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.fav-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.20);
+    padding: 8px 14px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.30);
+    transition: 0.2s ease;
+}
+
+    .fav-chip:hover {
+        background: rgba(255,255,255,0.32);
+        transform: translateY(-2px);
+    }
+
+.fav-city {
+    cursor: pointer;
+    font-size: 1rem;
+    color: #fff;
+}
+
+.fav-remove {
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+    .fav-remove:hover {
+        opacity: 1;
+    }
+
+/* =====================================================
+   CENTER SEARCH (Matches Home Page Style)
+   ===================================================== */
+
+.search-hero {
+    margin: 25px auto;
+    max-width: 600px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+    .search-hero .search-input {
+        flex: 1;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        background: rgba(255,255,255,0.25);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        font-size: 1.1rem;
+    }
+
+        .search-hero .search-input::placeholder {
+            color: rgba(255,255,255,0.75);
+        }
+
+.btn-search {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: #fff;
+    border: none;
+    padding: 14px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+    .btn-search:hover {
+        transform: scale(1.05);
+    }
+
+.btn-fav {
+    background: #8affc1;
+    color: black;
+    border: none;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+    .btn-fav:hover {
+        transform: scale(1.05);
+    }
+
+/* =====================================================
+   Forecast Grid
+   ===================================================== */
+
+.forecast-title {
+    margin-top: 30px;
+    margin-bottom: 12px;
+    font-size: 1.4rem;
+}
+
+.forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 18px;
+    margin-bottom: 40px;
+}
+
+.forecast-card {
+    background: rgba(255,255,255,0.18);
+    padding: 18px;
+    color: #fff;
+    border-radius: 20px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+    transition: 0.25s ease;
+}
+
+    .forecast-card:hover {
+        transform: translateY(-4px);
+    }
+
+.forecast-date {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.forecast-temp {
+    font-size: 1.1rem;
+    margin-top: 8px;
+    color: #fff;
+}
+
+.forecast-desc {
+    opacity: 0.9;
+    margin-top: 4px;
+}
+/* Micro animations */
+.animate-fade-in {
+    animation: fadeIn .6s ease both;
+}
+
+.animate-pop-in {
+    animation: popIn .45s ease both;
+}
+
+.animate-hero {
+    animation: fadeUp .55s ease both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(.96)
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1)
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+/* ============================================
+   PREMIUM SIDEBAR (Glass, Blur, Animations)
+   ============================================ */
+
+.sidebar-container {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 28px 20px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 4px 0 18px rgba(0,0,0,0.25);
+    z-index: 20;
+    animation: sidebarSlide 0.7s ease forwards;
+}
+
+/* Slide animation */
+@keyframes sidebarSlide {
+    from {
+        transform: translateX(-40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.sidebar-logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 34px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    letter-spacing: .6px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Sidebar items */
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-size: 1rem;
+    color: #ffffff;
+    background: rgba(255,255,255,0.05);
+    transition: 0.25s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+    /* Icons */
+    .sidebar-item i {
+        font-size: 1.25rem;
+        transition: transform .25s ease;
+    }
+
+    /* Hover effect */
+    .sidebar-item:hover {
+        background: rgba(255,255,255,0.22);
+        transform: translateX(6px);
+        border-color: rgba(255,255,255,0.35);
+    }
+
+        .sidebar-item:hover i {
+            transform: scale(1.18);
+        }
+
+    /* Active link highlight */
+    .sidebar-item.active,
+    .sidebar-item.active i {
+        background: linear-gradient(135deg, #6c63ff, #8f6fff);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.22);
+        border-color: transparent;
+        font-weight: 600;
+        transform: translateX(4px);
+    }
+
+/* Logout button special style */
+.sidebar-logout {
+    background: rgba(255, 50, 50, 0.25) !important;
+    border: 1px solid rgba(255, 70, 70, 0.45) !important;
+}
+
+    .sidebar-logout:hover {
+        background: rgba(255, 50, 50, 0.40) !important;
+        transform: translateX(6px);
+        border-color: rgba(255,80,80,0.65) !important;
+    }
+
+/* Mobile responsive sidebar */
+@media(max-width: 900px) {
+    .sidebar-container {
+        width: 200px;
+        padding: 22px 15px;
+    }
+}
