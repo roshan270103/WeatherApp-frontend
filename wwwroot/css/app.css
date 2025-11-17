@@ -879,5 +879,13 @@ body {
         padding: 22px 15px;
     }
 }
+.forecast-card {
+    margin: 0 !important;
+    padding: 12px; /* or as desired */
+}
+.forecast-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); /* You can lower 150px to 110px or 100px */
+    gap: 4px;
+}
 
 
