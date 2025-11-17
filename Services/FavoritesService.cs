@@ -10,7 +10,7 @@ namespace Weatherfrontend.Services
     {
         private readonly HttpClient _http;
         private readonly AuthState _authState;
-        private readonly string _baseUrl = "https://localhost:7041/api/favorites";
+        private readonly string _baseUrl = "https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/favorites";
 
         public FavoritesService(HttpClient http, AuthState authState)
         {

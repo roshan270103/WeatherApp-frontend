@@ -36,7 +36,7 @@
         }
 
         var user = new { email = email, password = password };
-        var response = await Http.PostAsJsonAsync("https://localhost:7041/api/user/register", user);
+        var response = await Http.PostAsJsonAsync("https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/user/register", user);
 
         if (response.IsSuccessStatusCode)
         {

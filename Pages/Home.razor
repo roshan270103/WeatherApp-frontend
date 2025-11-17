@@ -111,8 +111,8 @@
 
         try
         {
-            var weatherUrl = $"https://localhost:7041/api/weather?city={city}";
-            var forecastUrl = $"https://localhost:7041/api/weather/forecast?city={city}";
+            var weatherUrl = $"https://weatherbackendapi-fbceb0brdmqdgmca.southindia-01.azurewebsites.net/api/weather?city={city}"; /* UPDATE */
+            var forecastUrl = "https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/weather/forecast?city=" + city;
 
             weather = await Http.GetFromJsonAsync<WeatherResponse>(weatherUrl);
             forecastDays = await Http.GetFromJsonAsync<List<ForecastDay>>(forecastUrl);
