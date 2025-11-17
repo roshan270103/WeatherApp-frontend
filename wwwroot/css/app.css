@@ -878,3 +878,7 @@ body {
         padding: 22px 15px;
     }
 }
+.forecast-grid {
+    background-color: red !important;
+    gap: 2px !important;
+}
