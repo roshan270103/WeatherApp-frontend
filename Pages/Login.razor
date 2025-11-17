@@ -31,7 +31,10 @@
     private async Task LoginUser()
     {
         var user = new { email = email, password = password };
-        var response = await Http.PostAsJsonAsync("https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/user/login", user);
+        var response = await Http.PostAsJsonAsync(
+            "https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/user/login",
+            user
+        );
 
         if (response.IsSuccessStatusCode)
         {
