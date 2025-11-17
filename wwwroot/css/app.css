@@ -471,11 +471,10 @@ body {
 /* FORECAST GRID */
 .forecast-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Or reduce to 130px for tighter fit */
-    gap: 4px; /* Set to your desired tightness: 2px, 4px, etc */
-    margin-bottom: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
 }
-
 
 .forecast-item {
     background: rgba(255,255,255,0.2);
@@ -684,14 +683,25 @@ body {
     margin-bottom: 12px;
     font-size: 1.4rem;
 }
+
 .forecast-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Or reduce to 130px for tighter fit */
-    gap: 4px; /* Set to your desired tightness: 2px, 4px, etc */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2px; /* Use 2px, 4px, or 6px as you like */
     margin-bottom: 40px;
 }
 
 
+.forecast-card {
+    background: rgba(255,255,255,0.18);
+    padding: 18px;
+    color: #fff;
+    border-radius: 12px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+    transition: 0.25s ease;
+}
 
     .forecast-card:hover {
         transform: translateY(-4px);
@@ -869,16 +879,12 @@ body {
         padding: 22px 15px;
     }
 }
-.forecast-card {
-    margin: 0 !important;
-    width: 120px;
-    padding: 12px;
-}
+
 
 .forecast-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 4px;
+    gap: 0px;
 }
 
 
