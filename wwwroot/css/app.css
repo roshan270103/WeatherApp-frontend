@@ -675,7 +675,7 @@ body {
     }
 
 /* =====================================================
-   Forecast Grid
+   Forecast Grid why is it 
    ===================================================== */
 
 .forecast-title {
@@ -684,10 +684,10 @@ body {
     font-size: 1.4rem;
 }
 
-.forecast-grid {
+.forecast-grid { 
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 6px;
+    gap: 2px;
     margin-bottom: 40px;
 }
 
@@ -695,7 +695,7 @@ body {
     background: rgba(255,255,255,0.18);
     padding: 18px;
     color: #fff;
-    border-radius: 20px;
+    border-radius: 12px;
     text-align: center;
     backdrop-filter: blur(12px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.22);
