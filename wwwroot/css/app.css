@@ -86,7 +86,7 @@ body {
 .forecast-container {
     margin: 30px auto;
     display: flex;
-    gap: 12px;
+    gap: 2px;
     justify-content: center;
     flex-wrap: wrap;
 }
