@@ -684,12 +684,13 @@ body {
     font-size: 1.4rem;
 }
 
-.forecast-grid { 
+.forecast-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 2px;
+    gap: 2px; /* Use 2px, 4px, or 6px as you like */
     margin-bottom: 40px;
 }
+
 
 .forecast-card {
     background: rgba(255,255,255,0.18);
@@ -878,7 +879,5 @@ body {
         padding: 22px 15px;
     }
 }
-.forecast-grid {
-    background-color: red !important;
-    gap: 2px !important;
-}
+
+
