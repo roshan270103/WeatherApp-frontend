@@ -471,10 +471,11 @@ body {
 /* FORECAST GRID */
 .forecast-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* can make even 110px for more cards per row if wanted */
+    gap: 4px; /* <= THIS controls the gap -- use 2px or 4px or even 0px for super tight */
+    margin-bottom: 40px;
 }
+
 
 .forecast-item {
     background: rgba(255,255,255,0.2);
@@ -686,10 +687,11 @@ body {
 
 .forecast-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 2px; /* Use 2px, 4px, or 6px as you like */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* can make even 110px for more cards per row if wanted */
+    gap: 4px; /* <= THIS controls the gap -- use 2px or 4px or even 0px for super tight */
     margin-bottom: 40px;
 }
+
 
 
 .forecast-card {
@@ -881,10 +883,6 @@ body {
 }
 
 
-.forecast-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0px;
-}
+
 
 
