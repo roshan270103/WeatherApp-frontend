@@ -31,12 +31,43 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+    <script>
+        window.getGeolocation = function () {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            resolve({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            });
+                        },
+                        (err) => reject('User denied Geolocation')
+                    );
+                } else {
+                    reject('Geolocation not available');
+                }
+            });
+        };
+    </script>
 
     <script>
         // ✅ JS function used by Home.razor to update the body background
         window.setBodyClass = function (className) {
             document.body.className = className;
         }
+    </script>
+
+    <script>
+        window.setSearchCount = function (value) {
+            localStorage.setItem("searchCount", value);
+        };
+        window.getSearchCount = function () {
+            return parseInt(localStorage.getItem("searchCount") || "0");
+        };
+        window.resetSearchCount = function () {
+            localStorage.removeItem("searchCount");
+        };
     </script>
 
     <script src="_framework/blazor.webassembly.js"></script>
