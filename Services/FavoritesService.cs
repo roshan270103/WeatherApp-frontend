@@ -11,7 +11,7 @@ namespace Weatherfrontend.Services
         private readonly HttpClient _http;
         private readonly AuthState _authState;
         private readonly string _baseUrl = "https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/favorites";
-        
+
         public FavoritesService(HttpClient http, AuthState authState)
         {
             _http = http;
@@ -19,7 +19,6 @@ namespace Weatherfrontend.Services
         }
 
         // GET /api/favorites/get
-
         public async Task<List<string>> GetFavoritesAsync()
         {
             try
@@ -52,25 +51,48 @@ namespace Weatherfrontend.Services
         }
 
         // POST /api/favorites/add
-        public async Task<bool> AddFavoriteAsync(string city)
+        public async Task<FavoriteResult> AddFavoriteAsync(string city)
         {
+            var result = new FavoriteResult();
             try
             {
                 var token = _authState.Token;
                 if (string.IsNullOrEmpty(token))
-                    throw new System.Exception("Missing JWT token. Please log in again.");
+                {
+                    result.Error = "Missing JWT token. Please log in again.";
+                    return result;
+                }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/add");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 request.Content = JsonContent.Create(new { City = city });
 
                 var response = await _http.SendAsync(request);
-                return response.IsSuccessStatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    return result;
+                }
+                else
+                {
+                    // Try to read the error message from backend
+                    try
+                    {
+                        var errJson = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                        result.Error = errJson?.Error ?? "Unknown error.";
+                    }
+                    catch
+                    {
+                        result.Error = await response.Content.ReadAsStringAsync();
+                    }
+                    return result;
+                }
             }
             catch (System.Exception ex)
             {
-                System.Console.WriteLine($"❌ AddFavoriteAsync error: {ex.Message}");
-                return false;
+                result.Error = $"Could not add favorite: {ex.Message}";
+                return result;
             }
         }
 
@@ -97,10 +119,22 @@ namespace Weatherfrontend.Services
             }
         }
 
+        // Result and error classes
         public class FavoritesResponse
         {
             public string Message { get; set; }
             public List<string> Favorites { get; set; }
+        }
+
+        public class FavoriteResult
+        {
+            public bool Success { get; set; }
+            public string? Error { get; set; }
+        }
+
+        public class ErrorResponse
+        {
+            public string Error { get; set; }
         }
     }
 }

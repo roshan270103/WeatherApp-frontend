@@ -191,17 +191,21 @@
             return;
         }
 
-        var ok = await FavoritesService.AddFavoriteAsync(city);
-        if (ok)
+        // Try adding the favorite and get the result details
+        var result = await FavoritesService.AddFavoriteAsync(city);
+
+        if (!result.Success)
+        {
+            // Show the real error from backend (e.g., "City not found...")
+            ShowPopup(result.Error ?? "❌ Failed to add favorite");
+        }
+        else
         {
             ShowPopup($"✅ Added {city}");
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         }
-        else
-        {
-            ShowPopup("❌ Failed to add favorite");
-        }
     }
+
 
     private async Task RemoveFavorite(string fav)
     {
