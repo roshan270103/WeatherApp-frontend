@@ -102,7 +102,7 @@
             var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={owmApiKey}";
             var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
 
-            city = geoResults?.FirstOrDefault()?.name ?? null;
+            city = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
 
             if (!string.IsNullOrWhiteSpace(city))
             {
