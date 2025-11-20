@@ -2,19 +2,19 @@
 @inject Weatherfrontend.Services.FavoritesService FavoritesService
 @inject Weatherfrontend.Services.AuthState AuthState
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <div class="dashboard-container">
 
-    <!-- Title + subtitle (Upgrade #7) -->
+    <!-- Title + subtitle -->
     <div class="animate-fade-in">
         <h1 class="dashboard-title">🌤 Weather Dashboard</h1>
         <div class="dashboard-subtitle">View your favorites & explore forecasts</div>
     </div>
 
-    <!-- Favorites chips (Upgrade DONE#8) -->
+    <!-- Favorites chips -->
     <div class="glass-card favorites-box animate-pop-in">
         <h3>Your Favorites</h3>
-
         @if (favoriteCities.Count == 0)
         {
             <div class="no-fav">(No favorites yet)</div>
@@ -33,7 +33,7 @@
         }
     </div>
 
-    <!-- Centered pill search (Upgrade #4) -->
+    <!-- Search favorites -->
     <div class="search-hero animate-fade-in">
         <input class="search-input" @bind="city" placeholder="Enter city name..." />
         <button class="btn-search" @onclick="GetWeather">Search</button>
@@ -42,29 +42,25 @@
 
     @if (currentWeather != null)
     {
-        <!-- Dynamic hero with overlay (Upgrade #3) -->
+        <!-- Dashboard weather display -->
         <div class="dashboard-hero animate-hero"
              style="background-image:
-                        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-                        url('@GetWeatherBackgroundImage()');">
-
+                            linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                            url('@GetWeatherBackgroundImage()');">
             <div class="hero-left">
                 <h1>@currentWeather.City</h1>
                 <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
-
                 <div class="hero-info-row">
                     <div class="hero-info-pill">Wind @currentWeather.WindSpeed m/s</div>
                     <div class="hero-info-pill">@currentWeather.Description</div>
                 </div>
             </div>
-
             <div class="hero-today">
                 <img src="@($"https://openweathermap.org/img/wn/{currentWeather.IconId}@2x.png")" />
                 <div class="temp">@currentWeather.Temp°C</div>
             </div>
         </div>
-
-        <!-- Forecast (keeps your existing forecast styles, adds animation #6) -->
+        <!-- Forecast -->
         <h3 class="forecast-title">5-Day Forecast</h3>
         <div class="forecast-grid">
             @foreach (var day in forecastList)
@@ -78,6 +74,55 @@
             }
         </div>
     }
+
+    <!-- Comparison Feature -->
+    <div class="comparison-section glass-card animate-pop-in" style="margin-top:2rem;">
+        <h3>Compare Two Cities</h3>
+        <div class="compare-row" style="margin-bottom:1rem;">
+            <input placeholder="City 1" @bind="city1" class="compare-input" style="margin-right:0.5rem;" />
+            <input placeholder="City 2" @bind="city2" class="compare-input" style="margin-right:0.5rem;" />
+            <button class="btn-compare" @onclick="CompareCities" disabled="@isComparing">Compare</button>
+        </div>
+        @if (compareWeather1 != null && compareWeather2 != null)
+        {
+            <table class="comparison-table" style="width:100%;text-align:center;">
+                <tr>
+                    <th style="width:25%;"></th>
+                    <th style="width:35%;">@compareWeather1.City</th>
+                    <th style="width:35%;">@compareWeather2.City</th>
+                </tr>
+                <tr>
+                    <td>Temperature</td>
+                    <td>@compareWeather1.Temp&nbsp;°C</td>
+                    <td>@compareWeather2.Temp&nbsp;°C</td>
+                </tr>
+                <tr>
+                    <td>Condition</td>
+                    <td>@compareWeather1.Description</td>
+                    <td>@compareWeather2.Description</td>
+                </tr>
+                <tr>
+                    <td>Wind</td>
+                    <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
+                    <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
+                </tr>
+            </table>
+        }
+    </div>
+
+    <!-- Auto Geo Weather Block -->
+    @if (geoWeather != null)
+    {
+        <div class="geo-weather-block glass-card" style="margin-top:2rem;padding:1rem;">
+            <h4>Your Current Location: <span style="color:#4ca3ff">@geoWeather.City</span></h4>
+            <div>
+                <span>Temp: @geoWeather.Temp&nbsp;°C, </span>
+                <span>@geoWeather.Description, </span>
+                <span>Wind: @geoWeather.WindSpeed&nbsp;m/s</span>
+            </div>
+        </div>
+    }
+
 </div>
 
 @if (!string.IsNullOrEmpty(popupMessage))
@@ -94,10 +139,21 @@
 
     private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
 
+    // For comparison & geo weather
+    private string city1 = "";
+    private string city2 = "";
+    private WeatherData? compareWeather1;
+    private WeatherData? compareWeather2;
+    private bool isComparing = false;
+    private WeatherData? geoWeather;
+    private string? geoCityDashboard;
+
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(AuthState.UserId))
             favoriteCities = await FavoritesService.GetFavoritesAsync();
+
+        await TryDetectAndLoadDashboardWeather();
     }
 
     private async Task GetWeather()
@@ -165,6 +221,65 @@
         }
     }
 
+    // COMPARISON FEATURE
+    private async Task CompareCities()
+    {
+        isComparing = true;
+        compareWeather1 = await FetchWeatherForComparison(city1);
+        compareWeather2 = await FetchWeatherForComparison(city2);
+        isComparing = false;
+    }
+
+    private async Task<WeatherData?> FetchWeatherForComparison(string cityName)
+    {
+        try
+        {
+            var url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={ApiKey}&units=metric";
+            var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
+
+            if (data != null)
+            {
+                return new WeatherData
+                {
+                    City = data.Name,
+                    Temp = data.Main.Temp,
+                    Description = data.Weather[0].Description,
+                    WindSpeed = data.Wind.Speed,
+                    Main = data.Weather[0].Main,
+                    IconId = data.Weather[0].Icon
+                };
+            }
+        }
+        catch
+        {
+            // Optionally display a popup/error
+        }
+        return null;
+    }
+
+    // GEOLOCATION on DASHBOARD
+    private async Task TryDetectAndLoadDashboardWeather()
+    {
+        try
+        {
+            var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
+
+            var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={ApiKey}";
+            var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
+
+            geoCityDashboard = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
+
+            if (!string.IsNullOrWhiteSpace(geoCityDashboard))
+            {
+                geoWeather = await FetchWeatherForComparison(geoCityDashboard);
+            }
+        }
+        catch
+        {
+            // User denied or error — optional popup can be added
+        }
+    }
+
     // Dynamic background from your /wwwroot/images/weather folder
     private string GetWeatherBackgroundImage()
     {
@@ -191,12 +306,10 @@
             return;
         }
 
-        // Try adding the favorite and get the result details
         var result = await FavoritesService.AddFavoriteAsync(city);
 
         if (!result.Success)
         {
-            // Show the real error from backend (e.g., "City not found...")
             ShowPopup(result.Error ?? "❌ Failed to add favorite");
         }
         else
@@ -205,7 +318,6 @@
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         }
     }
-
 
     private async Task RemoveFavorite(string fav)
     {
@@ -237,7 +349,7 @@
         });
     }
 
-    /* Models */
+    // Models
     private class WeatherData
     {
         public string City { get; set; } = "";
@@ -247,7 +359,6 @@
         public double WindSpeed { get; set; }
         public string Main { get; set; } = "";
     }
-
     private class ForecastData
     {
         public DateTime Date { get; set; }
@@ -255,7 +366,6 @@
         public string Description { get; set; } = "";
         public string IconId { get; set; } = "";
     }
-
     private class WeatherApiResponse
     {
         public string Name { get; set; } = "";
@@ -268,4 +378,6 @@
     private class MainData { public double Temp { get; set; } }
     private class WeatherCondition { public string Main { get; set; } = ""; public string Description { get; set; } = ""; public string Icon { get; set; } = ""; }
     private class WindData { public double Speed { get; set; } }
+    private class LatLong { public double Latitude { get; set; } public double Longitude { get; set; } }
+    private class GeoResult { public string name { get; set; } }
 }
