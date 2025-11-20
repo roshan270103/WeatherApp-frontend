@@ -58,15 +58,21 @@
         }
     </script>
 
+    <!-- Updated daily search persistence: -->
     <script>
-        window.setSearchCount = function (value) {
-            localStorage.setItem("searchCount", value);
+        window.setSearchData = function (count, day) {
+            localStorage.setItem("searchCount", count);
+            localStorage.setItem("searchDay", day);
         };
-        window.getSearchCount = function () {
-            return parseInt(localStorage.getItem("searchCount") || "0");
+        window.getSearchData = function () {
+            return {
+                count: parseInt(localStorage.getItem("searchCount") || "0"),
+                day: localStorage.getItem("searchDay") || null
+            };
         };
-        window.resetSearchCount = function () {
+        window.resetSearchData = function () {
             localStorage.removeItem("searchCount");
+            localStorage.removeItem("searchDay");
         };
     </script>
 
