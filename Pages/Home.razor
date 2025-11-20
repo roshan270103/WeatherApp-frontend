@@ -11,7 +11,7 @@
         <p class="welcome-subtitle">Check your weather instantly for any city worldwide</p>
         <div class="search-center-row">
             <input class="weather-input" @bind="city" placeholder="Enter city..." />
-            <button class="weather-btn" @onclick="GetWeather">Search</button>
+            <button class="weather-btn" @onclick="@(() => GetWeather(false))">Search</button>
         </div>
     </div>
 }
@@ -40,7 +40,7 @@
     </div>
     <div class="search-hero animate-fade-in">
         <input class="search-input" @bind="city" placeholder="Search another city..." />
-        <button class="btn-search" @onclick="GetWeather">Search</button>
+        <button class="btn-search" @onclick="@(() => GetWeather(false))">Search</button>
     </div>
 }
 
@@ -72,60 +72,43 @@
     private string? error;
 
     private int searchCount = 0;
-    private const int searchLimit = 5;
+    private const int searchLimit = 10;
     private bool IsAuthenticated => !string.IsNullOrEmpty(AuthState?.UserId);
+    private string currentDay = DateTime.UtcNow.ToString("yyyy-MM-dd");
     private const string owmApiKey = "898c51e8b3072bda4577b3aff97c30e7"; // Set your API key here
 
     protected override async Task OnInitializedAsync()
     {
         if (!IsAuthenticated)
         {
-            searchCount = await JS.InvokeAsync<int>("getSearchCount");
-        }
-        else
-        {
-            await JS.InvokeVoidAsync("resetSearchCount");
-            searchCount = 0;
-        }
-
-        // Attempt location detection and weather (runs only on page load)
-        await TryDetectAndLoadWeather();
-    }
-
-    private async Task TryDetectAndLoadWeather()
-    {
-        try
-        {
-            var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
-
-            // Get the closest city name
-            var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={owmApiKey}";
-            var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
-
-            city = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
-
-            if (!string.IsNullOrWhiteSpace(city))
+            var data = await JS.InvokeAsync<SearchData>("getSearchData");
+            if (data.day != currentDay)
             {
-                await GetWeather();
+                searchCount = 0;
+                await JS.InvokeVoidAsync("setSearchData", 0, currentDay);
             }
             else
             {
-                error = "Could not determine your city from location.";
+                searchCount = data.count;
             }
         }
-        catch
+        else
         {
-            // User denied or error - stay silent or set an info message if you want
+            await JS.InvokeVoidAsync("resetSearchData");
+            searchCount = 0;
         }
+
+        // Attempt location detection and weather (on page load)
+        await TryDetectAndLoadWeather();
     }
 
     private async Task IncrementSearchCount()
     {
         searchCount++;
-        await JS.InvokeVoidAsync("setSearchCount", searchCount);
+        await JS.InvokeVoidAsync("setSearchData", searchCount, currentDay);
     }
 
-    private async Task GetWeather()
+    private async Task GetWeather(bool isFromLocation = false)
     {
         error = null;
         weather = null;
@@ -137,11 +120,12 @@
             return;
         }
 
-        if (!IsAuthenticated)
+        // Only count manual searches toward the daily limit
+        if (!IsAuthenticated && !isFromLocation)
         {
             if (searchCount >= searchLimit)
             {
-                error = "Login to get unlimited searches!";
+                error = "Login to get unlimited searches! (Daily limit reached)";
                 return;
             }
             await IncrementSearchCount();
@@ -161,6 +145,33 @@
         }
     }
 
+    private async Task TryDetectAndLoadWeather()
+    {
+        try
+        {
+            var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
+
+            // Get the closest city name (use only first word for compatibility)
+            var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={owmApiKey}";
+            var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
+
+            city = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
+
+            if (!string.IsNullOrWhiteSpace(city))
+            {
+                await GetWeather(true); // Skip increment, does NOT count against limit
+            }
+            else
+            {
+                error = "Could not determine your city from location.";
+            }
+        }
+        catch
+        {
+            // User denied or error - silent fail
+        }
+    }
+
     private string GetWeatherBackgroundImage()
     {
         if (weather?.weather == null || weather.weather.Count == 0)
@@ -175,10 +186,12 @@
         return "/images/weather/sunny.jpg";
     }
 
-    // Models
+    // JS Interop Models
+    public class SearchData { public int count { get; set; } public string day { get; set; } }
     public class LatLong { public double Latitude { get; set; } public double Longitude { get; set; } }
     public class GeoResult { public string name { get; set; } }
 
+    // Weather models
     public class WeatherResponse
     {
         public string name { get; set; }
