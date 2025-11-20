@@ -882,79 +882,117 @@ body {
     }
 }
 
-/* --- Comparison Section Styling --- */
-.comparison-section {
-    margin: 2rem 0;
-    padding: 1.5rem 1rem;
-    border-radius: 18px;
-    background: rgba(255,255,255, 0.12);
-    box-shadow: 0 0 18px 2px rgba(60, 70, 130, 0.07);
-}
 
-.compare-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-}
-
-.compare-input {
-    flex: 1 1 180px;
-    border: none;
-    border-radius: 9px;
-    padding: 0.45rem 0.9rem;
-    background: #f8f9fa;
-    font-size: 1rem;
-    transition: box-shadow 0.14s;
-    margin-bottom: 0.4rem;
-    min-width: 0;
-}
-
-    .compare-input:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px #4ca3ff88;
-    }
-
-.btn-compare {
-    background: linear-gradient(90deg, #4ca3ff 60%, #19dffd 100%);
+/* ======================
+   COMPARISON MODAL POPUP
+   ====================== */
+.btn-compare, .btn-compare-table {
+    background: linear-gradient(90deg,#4ca3ff 60%,#19dffd 100%);
     color: white;
     font-weight: 500;
     border: none;
-    border-radius: 7px;
-    padding: 0.5rem 1.3rem;
+    border-radius: 12px;
+    padding: 14px 24px;
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.13s;
+    margin-left: 8px;
 }
 
+    .btn-compare-table:disabled,
     .btn-compare:disabled {
         background: #bbb;
         cursor: not-allowed;
     }
 
-/* --- Comparison Table Styling --- */
+.compare-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10,18,44,0.24);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.compare-modal {
+    background: rgba(255,255,255,0.96);
+    box-shadow: 0 10px 35px 2px #2846841a;
+    border-radius: 22px;
+    padding: 2.2rem 2.4rem 2.1rem 2.4rem;
+    min-width: 360px;
+    max-width: 92vw;
+    min-height: 200px;
+    position: relative;
+    animation: pop-in 0.21s;
+    color: #325189;
+}
+
+/* Animate pop-in */
+@keyframes pop-in {
+    0% {
+        transform: scale(0.92) translateY(20px);
+        opacity: 0.15;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.compare-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.1rem;
+    flex-wrap: wrap;
+}
+
+.compare-input {
+    flex: 1 1 170px;
+    border: none;
+    border-radius: 10px;
+    background: #f2f6fa;
+    color: #2a3a5f;
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    min-width: 0;
+}
+
+    /* FOCUS effect for input */
+    .compare-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #4ca3ff77;
+    }
+
+/* ================
+   TABLE STYLING
+   ================ */
 .comparison-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0.5rem;
-    background: rgba(255,255,255,0.86);
-    border-radius: 10px;
+    margin-top: 1.2rem;
+    background: rgba(224,244,253,0.94);
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(60,70,130,0.08);
+    box-shadow: 0 2px 8px rgba(60,70,130,0.12);
+    font-size: 1.06rem;
 }
 
     .comparison-table th,
     .comparison-table td {
-        padding: 0.85rem 0.5rem;
-        border-bottom: 1px solid #eee;
-        font-size: 1.08rem;
+        padding: 0.9rem 0.5rem;
+        border-bottom: 1px solid #e7eaf7;
     }
 
     .comparison-table th {
-        background: linear-gradient(90deg, #f1f6fb 40%, #e3f7fd 100%);
-        color: #325189;
-        font-size: 1.08rem;
+        background: linear-gradient(90deg, #f4fafe 50%, #e6f8fd 100%);
+        color: #1d2b64;
+        font-size: 1.1rem;
         text-align: center;
     }
 
@@ -966,27 +1004,9 @@ body {
     .comparison-table th:first-child {
         font-weight: 600;
         text-align: left;
-        background: #f5f9fe;
+        background: #eaf8fe;
+        color: #1d2b64;
     }
-
-/* --- Geo Weather Block --- */
-.geo-weather-block {
-    background: linear-gradient(100deg, #e6f2ff 30%, #d0f5f5 90%);
-    border-radius: 12px;
-    box-shadow: 0 6px 18px 1px rgba(60, 70, 130, 0.11);
-    margin-top: 1.5rem;
-    padding: 1.2rem 1.7rem;
-    color: #27395d;
-    max-width: 480px;
-}
-
-    .geo-weather-block h4 {
-        margin: 0 0 0.19em 0;
-        color: #2266b2;
-        font-size: 1.18rem;
-        font-weight: 600;
-    }
-
 
 
 
