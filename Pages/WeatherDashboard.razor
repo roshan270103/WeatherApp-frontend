@@ -38,7 +38,6 @@
         <input class="search-input" @bind="city" placeholder="Enter city name..." />
         <button class="btn-search" @onclick="GetWeather">Search</button>
         <button class="btn-fav" @onclick="AddFavorite">Add Fav</button>
-        <button class="btn-compare" @onclick="() => showCompareBox = true">Compare</button>
     </div>
 
     @if (currentWeather != null)
@@ -46,8 +45,8 @@
         <!-- Dashboard weather display -->
         <div class="dashboard-hero animate-hero"
              style="background-image:
-                                linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-                                url('@GetWeatherBackgroundImage()');">
+                                    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                                    url('@GetWeatherBackgroundImage()');">
             <div class="hero-left">
                 <h1>@currentWeather.City</h1>
                 <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
@@ -74,50 +73,44 @@
                 </div>
             }
         </div>
+
+        <!-- Comparison Feature (below forecast) -->
+        <div class="comparison-section glass-card animate-pop-in" style="margin-top:28px;">
+            <h3 style="margin-bottom:1.3rem; color:#fff; font-size:1.38rem; font-weight:600;">Compare Two Cities</h3>
+            <div class="compare-row" style="margin-bottom:1.1rem;">
+                <input placeholder="City 1" @bind="city1" class="compare-input" />
+                <input placeholder="City 2" @bind="city2" class="compare-input" />
+                <button class="btn-compare-table" @onclick="CompareCities" disabled="@isComparing">Compare</button>
+            </div>
+            @if (compareWeather1 != null && compareWeather2 != null)
+            {
+                <table class="comparison-table" style="width:100%;text-align:center;">
+                    <tr>
+                        <th style="width:28%;"></th>
+                        <th>@compareWeather1.City</th>
+                        <th>@compareWeather2.City</th>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td>@compareWeather1.Temp&nbsp;°C</td>
+                        <td>@compareWeather2.Temp&nbsp;°C</td>
+                    </tr>
+                    <tr>
+                        <td>Condition</td>
+                        <td>@compareWeather1.Description</td>
+                        <td>@compareWeather2.Description</td>
+                    </tr>
+                    <tr>
+                        <td>Wind</td>
+                        <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
+                        <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
+                    </tr>
+                </table>
+            }
+        </div>
+
     }
 
-    <!-- Modal Comparison Box -->
-    @if (showCompareBox)
-    {
-        <div class="compare-modal-overlay" @onclick="() => showCompareBox = false">
-            <div class="compare-modal" @onclick:stopPropagation="true">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <h3>Compare Two Cities</h3>
-                    <button style="border:none;background:none;font-size:1.7rem;color:#325189;cursor:pointer;padding:0 6px;" @onclick="() => showCompareBox = false">×</button>
-                </div>
-                <div class="compare-row" style="margin-bottom:1rem;">
-                    <input placeholder="City 1" @bind="city1" class="compare-input" />
-                    <input placeholder="City 2" @bind="city2" class="compare-input" />
-                    <button class="btn-compare-table" @onclick="CompareCities" disabled="@isComparing">Compare</button>
-                </div>
-                @if (compareWeather1 != null && compareWeather2 != null)
-                {
-                    <table class="comparison-table" style="width:100%;text-align:center;">
-                        <tr>
-                            <th></th>
-                            <th>@compareWeather1.City</th>
-                            <th>@compareWeather2.City</th>
-                        </tr>
-                        <tr>
-                            <td>Temperature</td>
-                            <td>@compareWeather1.Temp&nbsp;°C</td>
-                            <td>@compareWeather2.Temp&nbsp;°C</td>
-                        </tr>
-                        <tr>
-                            <td>Condition</td>
-                            <td>@compareWeather1.Description</td>
-                            <td>@compareWeather2.Description</td>
-                        </tr>
-                        <tr>
-                            <td>Wind</td>
-                            <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
-                            <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
-                        </tr>
-                    </table>
-                }
-            </div>
-        </div>
-    }
 </div>
 
 @if (!string.IsNullOrEmpty(popupMessage))
@@ -134,8 +127,7 @@
 
     private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
 
-    // For comparison modal
-    private bool showCompareBox = false;
+    // For comparison section
     private string city1 = "";
     private string city2 = "";
     private WeatherData? compareWeather1;
@@ -235,7 +227,7 @@
         }
     }
 
-    // Comparison modal logic
+    // Comparison section logic
     private async Task CompareCities()
     {
         isComparing = true;
@@ -268,6 +260,7 @@
         }
         return null;
     }
+
     private string GetWeatherBackgroundImage()
     {
         if (currentWeather == null) return "/images/weather/cloudy.jpg";
