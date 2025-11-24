@@ -16,7 +16,7 @@
 
         @if (!string.IsNullOrEmpty(message))
         {
-            <p style="margin-top:15px; color:#fff;">@message</p>
+            <div class="auth-error-box animate-fade-in">@message</div>
         }
     </div>
 </div>
@@ -29,9 +29,15 @@
 
     private async Task RegisterUser()
     {
+        message = "";
         if (password != confirmPassword)
         {
-            message = "❌ Passwords do not match";
+            message = "❌ Passwords do not match.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            message = "❌ Email and password are required.";
             return;
         }
 
@@ -50,7 +56,35 @@
         else
         {
             var error = await response.Content.ReadAsStringAsync();
-            message = $"❌ Registration failed: {error}";
+            message = GetRegisterErrorMessage(error);
         }
+    }
+
+    private string GetRegisterErrorMessage(string rawJson)
+    {
+        try
+        {
+            var doc = System.Text.Json.JsonDocument.Parse(rawJson);
+            if (doc.RootElement.TryGetProperty("msg", out var msgElem))
+                return "❌ " + msgElem.GetString();
+
+            if (rawJson.Contains("already exists"))
+                return "❌ An account with this email already exists.";
+            if (rawJson.Contains("validation_failed"))
+                return "❌ Registration failed. Please check your input.";
+            if (rawJson.Contains("missing"))
+                return "❌ Please provide all required fields.";
+        }
+        catch
+        {
+            // If not JSON or parsing fails, fallback to generic
+        }
+        if (rawJson.Contains("already exists"))
+            return "❌ An account with this email already exists.";
+        if (rawJson.Contains("validation_failed"))
+            return "❌ Registration failed. Please check your input.";
+        if (rawJson.Contains("missing"))
+            return "❌ Please provide all required fields.";
+        return "❌ Registration failed. Please try again.";
     }
 }

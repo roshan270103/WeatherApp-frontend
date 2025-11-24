@@ -38,6 +38,9 @@
         <input class="search-input" @bind="city" placeholder="Enter city name..." />
         <button class="btn-search" @onclick="GetWeather">Search</button>
         <button class="btn-fav" @onclick="AddFavorite">Add Fav</button>
+        <button class="btn-location" @onclick="@(async () => await ManualLocationLoad())">
+            <span class="material-icons" style="vertical-align:middle;">my_location</span> Get My Location
+        </button>
     </div>
 
     @if (currentWeather != null)
@@ -45,8 +48,8 @@
         <!-- Dashboard weather display -->
         <div class="dashboard-hero animate-hero"
              style="background-image:
-                                    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-                                    url('@GetWeatherBackgroundImage()');">
+                                            linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                                            url('@GetWeatherBackgroundImage()');">
             <div class="hero-left">
                 <h1>@currentWeather.City</h1>
                 <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
@@ -78,8 +81,32 @@
         <div class="comparison-section glass-card animate-pop-in" style="margin-top:28px;">
             <h3 style="margin-bottom:1.3rem; color:#fff; font-size:1.38rem; font-weight:600;">Compare Two Cities</h3>
             <div class="compare-row" style="margin-bottom:1.1rem;">
-                <input placeholder="City 1" @bind="city1" class="compare-input" />
-                <input placeholder="City 2" @bind="city2" class="compare-input" />
+                <div class="compare-input-group">
+                    <input placeholder="City 1" @bind="city1" class="compare-input" autocomplete="off" />
+                    <span class="dropdown-arrow" @onclick="() => ToggleFavDropdown(1)">▼</span>
+                    @if (showFavDropdown1 && favoriteCities.Any())
+                    {
+                        <ul class="dropdown-list">
+                            @foreach (var fav in favoriteCities)
+                            {
+                                <li @onclick="() => SelectFav(1, fav)">@fav</li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div class="compare-input-group">
+                    <input placeholder="City 2" @bind="city2" class="compare-input" autocomplete="off" />
+                    <span class="dropdown-arrow" @onclick="() => ToggleFavDropdown(2)">▼</span>
+                    @if (showFavDropdown2 && favoriteCities.Any())
+                    {
+                        <ul class="dropdown-list">
+                            @foreach (var fav in favoriteCities)
+                            {
+                                <li @onclick="() => SelectFav(2, fav)">@fav</li>
+                            }
+                        </ul>
+                    }
+                </div>
                 <button class="btn-compare-table" @onclick="CompareCities" disabled="@isComparing">Compare</button>
             </div>
             @if (compareWeather1 != null && compareWeather2 != null)
@@ -108,7 +135,6 @@
                 </table>
             }
         </div>
-
     }
 
 </div>
@@ -133,6 +159,38 @@
     private WeatherData? compareWeather1;
     private WeatherData? compareWeather2;
     private bool isComparing = false;
+
+    // Dropdowns for compare inputs
+    private bool showFavDropdown1 = false;
+    private bool showFavDropdown2 = false;
+
+    private void ToggleFavDropdown(int which)
+    {
+        if (which == 1)
+        {
+            showFavDropdown1 = !showFavDropdown1;
+            showFavDropdown2 = false;
+        }
+        else
+        {
+            showFavDropdown2 = !showFavDropdown2;
+            showFavDropdown1 = false;
+        }
+    }
+
+    private void SelectFav(int which, string city)
+    {
+        if (which == 1)
+        {
+            city1 = city;
+            showFavDropdown1 = false;
+        }
+        else
+        {
+            city2 = city;
+            showFavDropdown2 = false;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,6 +217,30 @@
         catch
         {
             // Fail silent if denied.
+        }
+    }
+
+    private async Task ManualLocationLoad()
+    {
+        try
+        {
+            var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
+            var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={ApiKey}";
+            var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
+            var detectedCity = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
+            if (!string.IsNullOrWhiteSpace(detectedCity))
+            {
+                city = detectedCity;
+                await GetWeather();
+            }
+            else
+            {
+                popupMessage = "Could not determine your city from location.";
+            }
+        }
+        catch
+        {
+            popupMessage = "Could not access your location permission.";
         }
     }
 
@@ -360,4 +442,5 @@
     private class WindData { public double Speed { get; set; } }
     private class LatLong { public double Latitude { get; set; } public double Longitude { get; set; } }
     private class GeoResult { public string name { get; set; } }
+    
 }

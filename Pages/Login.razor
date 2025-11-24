@@ -4,10 +4,8 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 
-
 <div class="auth-wrapper">
     <div class="auth-card">
-
         <h2>Welcome Back 👋</h2>
         <p class="auth-subtitle">Login to continue to your weather dashboard</p>
 
@@ -18,7 +16,7 @@
 
         @if (!string.IsNullOrEmpty(message))
         {
-            <p style="margin-top:15px; color:#fff;">@message</p>
+            <div class="login-error-box animate-fade-in">@message</div>
         }
     </div>
 </div>
@@ -30,6 +28,7 @@
 
     private async Task LoginUser()
     {
+        message = "";
         var user = new { email = email, password = password };
         var response = await Http.PostAsJsonAsync(
             "https://weatherbackendapi-fbceb0brdmdqgmca.southindia-01.azurewebsites.net/api/user/login",
@@ -44,7 +43,6 @@
             {
                 await authState.LoginAsync(result.id, result.email, result.accessToken);
                 NavigationManager.NavigateTo("/weatherdashboard", true);
-
             }
             else
             {
@@ -54,8 +52,40 @@
         else
         {
             var errorMsg = await response.Content.ReadAsStringAsync();
-            message = $"Login failed: {errorMsg}";
+            message = GetFriendlyErrorMessage(errorMsg);
         }
+    }
+
+    private string GetFriendlyErrorMessage(string rawJson)
+    {
+        try
+        {
+            // Try to parse standard backend error format
+            var doc = System.Text.Json.JsonDocument.Parse(rawJson);
+            if (doc.RootElement.TryGetProperty("msg", out var msgElem))
+                return msgElem.GetString();
+
+            // Fallback for "error_code" or similar
+            if (rawJson.Contains("invalid_credentials"))
+                return "Invalid email or password. Please try again.";
+            if (rawJson.Contains("missing email"))
+                return "Please enter your email address.";
+            if (rawJson.Contains("validation_failed"))
+                return "Email and password are required.";
+        }
+        catch
+        {
+            // Fallback for any non-JSON error
+        }
+
+        // As default fallback:
+        if (rawJson.Contains("invalid_credentials"))
+            return "Invalid email or password. Please try again.";
+        if (rawJson.Contains("missing email"))
+            return "Please enter your email address.";
+        if (rawJson.Contains("validation_failed"))
+            return "Email and password are required.";
+        return "Login failed. Please check your credentials and try again.";
     }
 
     public class UserInfo
