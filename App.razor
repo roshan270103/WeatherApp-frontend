@@ -4,8 +4,11 @@
 <CascadingAuthenticationState>
     @if (!isLoaded)
     {
-        <!-- Show splash or nothing while auth loads -->
-        <div style="color:white; padding:20px;">Loading...</div>
+        <!-- Show animated spinner while auth loads (full screen overlay) -->
+        <div class="app-loading-overlay">
+            <div class="spinner"></div>
+            <span>Loading your app...</span>
+        </div>
     }
     else
     {

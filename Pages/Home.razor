@@ -4,6 +4,14 @@
 @inject IJSRuntime JS
 @inject Weatherfrontend.Services.AuthState AuthState
 
+@if (isSectionLoading)
+{
+    <div class="section-loading-overlay">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+    </div>
+}
+
 @if (weather == null)
 {
     <div class="welcome-section animate-fade-in">
@@ -75,6 +83,7 @@
     private WeatherResponse? weather;
     private List<ForecastDay> forecastDays = new();
     private string? error;
+    private bool isSectionLoading = false;
 
     private int searchCount = 0;
     private const int searchLimit = 10;
@@ -118,10 +127,12 @@
         error = null;
         weather = null;
         forecastDays.Clear();
+        isSectionLoading = true;
 
         if (string.IsNullOrWhiteSpace(city))
         {
             error = "Please enter a city!";
+            isSectionLoading = false;
             return;
         }
 
@@ -131,6 +142,7 @@
             if (searchCount >= searchLimit)
             {
                 error = "Login to get unlimited searches! (Daily limit reached)";
+                isSectionLoading = false;
                 return;
             }
             await IncrementSearchCount();
@@ -148,6 +160,10 @@
         {
             error = $"Error: {ex.Message}";
         }
+        finally
+        {
+            isSectionLoading = false;
+        }
     }
 
     // Called automatically at first load (if allowed), or manually from "Get My Location" button
@@ -159,6 +175,7 @@
     // Used by the button, and by TryDetectAndLoadWeather with default silentFail = false
     private async Task ManualLocationLoad(bool silentFail = false)
     {
+        isSectionLoading = true;
         try
         {
             var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
@@ -183,6 +200,10 @@
             {
                 error = "Could not access your location permission.";
             }
+        }
+        finally
+        {
+            isSectionLoading = false;
         }
     }
 

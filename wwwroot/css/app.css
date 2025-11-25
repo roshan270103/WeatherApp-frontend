@@ -1,6 +1,53 @@
-﻿/* ================================
+﻿.app-loading-overlay {
+    position: fixed;
+    z-index: 25000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #1d2b64 44%, #5a60f5 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.25rem;
+    letter-spacing: 0.03em;
+}
+
+.spinner {
+    border: 6px solid rgba(255,255,255,0.18);
+    border-top: 6px solid #4ac4ff;
+    border-radius: 50%;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 18px;
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+
+/* ================================
    GLOBAL BACKGROUND
    ================================ */
+
+
+
+
+
+
 
 html, body {
     height: 100%;
@@ -1169,3 +1216,40 @@ body {
     box-shadow: 0 2px 8px rgba(255,68,68,0.06);
     animation: fadeIn .35s;
 }
+.register-message-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 13px 18px;
+    font-size: 1.08rem;
+    font-weight: 500;
+    box-shadow: 0 2px 12px rgba(44,60,120,0.05);
+    background: rgba(255,68,68,0.10);
+    color: #ec4067;
+    border-left: 4px solid #ec4067;
+    margin-bottom: 8px;
+    text-align: center;
+    gap: 8px;
+    min-height: 40px;
+}
+
+    .register-message-box .msg-icon {
+        font-size: 1.38rem;
+        margin-right: 7px;
+        vertical-align: middle;
+    }
+
+        .register-message-box .msg-icon.success {
+            color: #19a366;
+        }
+
+.register-message-box {
+    transition: all 0.18s;
+}
+
+    .register-message-box:has(.msg-icon.success) {
+        background: rgba(25,163,102,0.10);
+        color: #19a366;
+        border-left-color: #19a366;
+    }
