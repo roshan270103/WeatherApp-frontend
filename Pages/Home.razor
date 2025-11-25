@@ -3,6 +3,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject Weatherfrontend.Services.AuthState AuthState
+@inject NavigationManager Navigation
 
 @if (isSectionLoading)
 {
@@ -73,10 +74,26 @@
     </div>
 }
 
-@if (error != null)
+@if (!string.IsNullOrWhiteSpace(error))
 {
-    <div class="error-message">@error</div>
+    <div class="auth-message-box error" style="margin-top:18px;">
+        <span class="msg-icon">@((error.Contains("unlimited searches")) ? "🔒" : "❌")</span>
+        @if (error.Contains("unlimited searches"))
+        {
+            <span>Login to get unlimited searches!</span>
+            <span class="inline-login-subbox">
+                <button class="inline-login-btn" @onclick='() => Navigation.NavigateTo("/login")'>
+                    Login
+                </button>
+            </span>
+        }
+        else
+        {
+            @error.Replace("❌", "")
+        }
+    </div>
 }
+
 
 @code {
     private string? city;

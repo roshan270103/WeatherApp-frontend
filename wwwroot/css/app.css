@@ -1320,3 +1320,23 @@ body {
         vertical-align: middle;
         line-height: 1;
     }
+.inline-login-btn {
+    margin-left: 16px;
+    background: rgba(76, 163, 255, 0.13);
+    color: #2274b6;
+    border: 1px solid #89dffd;
+    border-radius: 6px;
+    font-size: 1rem;
+    padding: 5px 16px;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(76, 163, 255, 0.03);
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    display: inline-block;
+}
+
+    .inline-login-btn:hover {
+        background: #4ac4ff;
+        color: #fff;
+        border-color: #0eb8df;
+    }
