@@ -12,6 +12,15 @@
         <div class="dashboard-subtitle">View your favorites & explore forecasts</div>
     </div>
 
+    <!-- Error Box -->
+    @if (!string.IsNullOrWhiteSpace(dashboardError))
+    {
+        <div class="auth-message-box error" style="margin-top:18px;">
+            <span class="msg-icon">❌</span>
+            @dashboardError
+        </div>
+    }
+
     <!-- Favorites chips -->
     <div class="glass-card favorites-box animate-pop-in">
         <h3>Your Favorites</h3>
@@ -48,8 +57,8 @@
         <!-- Dashboard weather display -->
         <div class="dashboard-hero animate-hero"
              style="background-image:
-                                            linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-                                            url('@GetWeatherBackgroundImage()');">
+                        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                        url('@GetWeatherBackgroundImage()');">
             <div class="hero-left">
                 <h1>@currentWeather.City</h1>
                 <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
@@ -136,7 +145,6 @@
             }
         </div>
     }
-
 </div>
 
 @if (!string.IsNullOrEmpty(popupMessage))
@@ -150,6 +158,7 @@
     private List<ForecastData> forecastList = new();
     private List<string> favoriteCities = new();
     private string? popupMessage;
+    private string dashboardError;
 
     private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
 
@@ -202,6 +211,8 @@
     // On load: get user city and auto-search
     private async Task TryGeoLoadDashboard()
     {
+        // (Optionally clear error)
+        dashboardError = null;
         try
         {
             var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
@@ -216,15 +227,17 @@
         }
         catch
         {
-            // Fail silent if denied.
+            // Fail silently on first app load.
         }
     }
 
     private async Task ManualLocationLoad()
     {
+        dashboardError = null;
         try
         {
             var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
+
             var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={ApiKey}";
             var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
             var detectedCity = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
@@ -235,20 +248,40 @@
             }
             else
             {
-                popupMessage = "Could not determine your city from location.";
+                dashboardError = "Could not determine your city from location.";
+            }
+        }
+        catch (JSException jsEx)
+        {
+            if (jsEx.Message.Contains("denied") || jsEx.Message.Contains("permission"))
+            {
+                var retry = await JS.InvokeAsync<bool>("confirm", "Location permission denied. Please allow location access in your browser settings and try again. Retry?");
+                if (retry)
+                {
+                    dashboardError = "Please allow location access in your browser settings and try again.";
+                }
+                else
+                {
+                    dashboardError = "Location permission denied. Unable to fetch weather for your current location.";
+                }
+            }
+            else
+            {
+                dashboardError = "Location permission error. Unable to fetch weather for your current location.";
             }
         }
         catch
         {
-            popupMessage = "Could not access your location permission.";
+            dashboardError = "Could not access your location permission.";
         }
     }
 
     private async Task GetWeather()
     {
+        dashboardError = null;
         if (string.IsNullOrWhiteSpace(city))
         {
-            ShowPopup("⚠️ Enter a city name first!");
+            dashboardError = "Please enter a city name!";
             return;
         }
 
@@ -258,12 +291,13 @@
 
     private async Task GetCurrentWeather()
     {
+        dashboardError = null;
         try
         {
             var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={ApiKey}&units=metric";
             var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
 
-            if (data != null)
+            if (data != null && data.Weather.Any())
             {
                 currentWeather = new WeatherData
                 {
@@ -275,10 +309,19 @@
                     Main = data.Weather[0].Main
                 };
             }
+            else
+            {
+                dashboardError = "City not found. Please input a valid city.";
+                currentWeather = null;
+                forecastList.Clear();
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            ShowPopup("❌ City not found");
+            if (ex.Message.Contains("404") || ex.Message.Contains("Not Found") || ex.Message.Contains("net_http_message_not_success_statuscode_reason"))
+                dashboardError = "City not found. Please input a valid city.";
+            else
+                dashboardError = "Could not fetch weather data. Please try again later.";
             currentWeather = null;
             forecastList.Clear();
         }
@@ -324,7 +367,7 @@
             var url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={ApiKey}&units=metric";
             var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
 
-            if (data != null)
+            if (data != null && data.Weather.Any())
             {
                 return new WeatherData
                 {
@@ -362,9 +405,28 @@
 
     private async Task AddFavorite()
     {
+        dashboardError = null;
         if (string.IsNullOrWhiteSpace(city))
         {
-            ShowPopup("⚠️ Enter a city first!");
+            dashboardError = "Enter a city to add to favorites!";
+            return;
+        }
+
+        // Validate the city exists first
+        try
+        {
+            var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={ApiKey}&units=metric";
+            var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
+
+            if (data == null || !data.Weather.Any())
+            {
+                dashboardError = "City not found. Please input a valid city.";
+                return;
+            }
+        }
+        catch
+        {
+            dashboardError = "City not found. Please input a valid city.";
             return;
         }
 
@@ -372,11 +434,11 @@
 
         if (!result.Success)
         {
-            ShowPopup(result.Error ?? "❌ Failed to add favorite");
+            dashboardError = result.Error ?? "❌ Failed to add favorite";
         }
         else
         {
-            ShowPopup($"✅ Added {city}");
+            popupMessage = $"✅ Added {city}";
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         }
     }
@@ -386,7 +448,7 @@
         var ok = await FavoritesService.RemoveFavoriteAsync(fav);
         if (ok)
         {
-            ShowPopup($"🗑 Removed {fav}");
+            popupMessage = $"🗑 Removed {fav}";
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         }
     }
@@ -411,7 +473,7 @@
         });
     }
 
-    // Models
+    // Models...
     private class WeatherData
     {
         public string City { get; set; } = "";
@@ -442,5 +504,4 @@
     private class WindData { public double Speed { get; set; } }
     private class LatLong { public double Latitude { get; set; } public double Longitude { get; set; } }
     private class GeoResult { public string name { get; set; } }
-    
 }

@@ -13,6 +13,8 @@
     </div>
 }
 
+
+
 @if (weather == null)
 {
     <div class="welcome-section animate-fade-in">
@@ -175,7 +177,16 @@
         }
         catch (Exception ex)
         {
-            error = $"Error: {ex.Message}";
+            // Show a clear, user-friendly message if it's a 404/not found,
+            // otherwise display a generic friendly message.
+            if (ex.Message.Contains("404") || ex.Message.Contains("Not Found") || ex.Message.Contains("net_http_message_not_success_statuscode_reason"))
+            {
+                error = "❌ City not found. Please input a valid city.";
+            }
+            else
+            {
+                error = "❌ Could not fetch weather data. Please try again later.";
+            }
         }
         finally
         {
