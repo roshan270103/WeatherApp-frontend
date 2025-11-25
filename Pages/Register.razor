@@ -16,13 +16,12 @@
 
         @if (!string.IsNullOrEmpty(message))
         {
-            <div class="auth-message-box animate-fade-in @((message.Contains("✅") ? "success" : "error"))">
-                <span class="msg-icon">
-                    @(message.Contains("✅") ? "✅" : "❌")
-                </span>
+            <div class="auth-message-box @((message.Contains("✅") ? "success" : "error"))" style="margin-top:17px;">
+                <span class="msg-icon">@((message.Contains("✅")) ? "✅" : "❌")</span>
                 @message.Replace("❌", "").Replace("✅", "")
             </div>
         }
+
 
     </div>
 </div>
