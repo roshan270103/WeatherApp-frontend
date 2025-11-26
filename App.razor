@@ -1,10 +1,18 @@
 ﻿@using Weatherfrontend.Services
 @inject AuthState AuthState
+@inject NavigationManager Navigation
+
+@if (isNavLoading)
+{
+    <div class="app-loading-overlay">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+    </div>
+}
 
 <CascadingAuthenticationState>
     @if (!isLoaded)
     {
-        <!-- Show animated spinner while auth loads (full screen overlay) -->
         <div class="app-loading-overlay">
             <div class="spinner"></div>
             <span>Loading your app...</span>
@@ -31,7 +39,6 @@
                     </LayoutView>
                 }
             </Found>
-
             <NotFound>
                 <LayoutView Layout="@typeof(MainLayout)">
                     <p role="alert" style="color:white;">Sorry, there's nothing at this address.</p>
@@ -43,10 +50,29 @@
 
 @code {
     private bool isLoaded = false;
+    private bool isNavLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
+        Navigation.LocationChanged += OnLocationChanged;
         await AuthState.LoadStateAsync();
         isLoaded = true;
+    }
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        isNavLoading = true;
+        StateHasChanged();
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(800); // Duration of loading overlay in ms
+            isNavLoading = false;
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }

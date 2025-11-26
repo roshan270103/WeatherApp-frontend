@@ -1,0 +1,134 @@
+﻿@page "/compare"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="compare-page-wrapper">
+    <h2 class="compare-title" style="margin-bottom: 1.2rem;">Compare Two Cities</h2>
+    <div class="compare-row" style="margin-bottom:1.1rem;">
+        <input placeholder="City 1" @bind="city1" class="compare-input" @onkeydown="HandleCompareEnter" />
+        <input placeholder="City 2" @bind="city2" class="compare-input" @onkeydown="HandleCompareEnter" />
+        <button class="btn-compare-table" @onclick="PerformComparison" disabled="@isComparing">Compare</button>
+        <button class="btn-back" @onclick="GoBack" style="margin-left: 16px;">Back to Dashboard</button>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(compareError))
+    {
+        <div class="auth-message-box error" style="margin-top:18px;">
+            <span class="msg-icon">❌</span>
+            @compareError
+        </div>
+    }
+    @if (compareWeather1 != null && compareWeather2 != null)
+    {
+        <table class="comparison-table" style="width:100%;text-align:center;">
+            <tr>
+                <th></th>
+                <th>@compareWeather1.City</th>
+                <th>@compareWeather2.City</th>
+            </tr>
+            <tr>
+                <td>Temperature</td>
+                <td>@compareWeather1.Temp&nbsp;°C</td>
+                <td>@compareWeather2.Temp&nbsp;°C</td>
+            </tr>
+            <tr>
+                <td>Condition</td>
+                <td>@compareWeather1.Description</td>
+                <td>@compareWeather2.Description</td>
+            </tr>
+            <tr>
+                <td>Wind</td>
+                <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
+                <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
+            </tr>
+        </table>
+    }
+</div>
+
+@code {
+    private string city1 = "";
+    private string city2 = "";
+    private WeatherData? compareWeather1;
+    private WeatherData? compareWeather2;
+    private bool isComparing = false;
+    private string compareError;
+    private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
+
+    private async Task HandleCompareEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await PerformComparison();
+        }
+    }
+
+    private async Task PerformComparison()
+    {
+        compareError = null;
+        compareWeather1 = null;
+        compareWeather2 = null;
+
+        if (string.IsNullOrWhiteSpace(city1) || string.IsNullOrWhiteSpace(city2))
+        {
+            compareError = "Please enter both cities.";
+            return;
+        }
+
+        isComparing = true;
+        compareWeather1 = await FetchWeatherForComparison(city1);
+        compareWeather2 = await FetchWeatherForComparison(city2);
+
+        if (compareWeather1 == null || compareWeather2 == null)
+        {
+            compareError = "City not found. Please input valid city names.";
+        }
+        isComparing = false;
+    }
+
+    private async Task<WeatherData?> FetchWeatherForComparison(string cityName)
+    {
+        try
+        {
+            var url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={ApiKey}&units=metric";
+            var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
+
+            if (data != null && data.Weather.Any())
+            {
+                return new WeatherData
+                {
+                    City = data.Name,
+                    Temp = data.Main.Temp,
+                    Description = data.Weather[0].Description,
+                    WindSpeed = data.Wind.Speed,
+                    Main = data.Weather[0].Main,
+                    IconId = data.Weather[0].Icon
+                };
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/weatherdashboard");
+
+    // Models
+    private class WeatherData
+    {
+        public string City { get; set; } = "";
+        public double Temp { get; set; }
+        public string Description { get; set; } = "";
+        public string IconId { get; set; } = "";
+        public double WindSpeed { get; set; }
+        public string Main { get; set; } = "";
+    }
+    private class WeatherApiResponse
+    {
+        public string Name { get; set; } = "";
+        public MainData Main { get; set; } = new();
+        public List<WeatherCondition> Weather { get; set; } = new();
+        public WindData Wind { get; set; } = new();
+    }
+    private class MainData { public double Temp { get; set; } }
+    private class WeatherCondition { public string Main { get; set; } = ""; public string Description { get; set; } = ""; public string Icon { get; set; } = ""; }
+    private class WindData { public double Speed { get; set; } }
+}

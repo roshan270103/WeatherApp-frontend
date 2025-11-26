@@ -3,6 +3,8 @@
 @inject Weatherfrontend.Services.AuthState AuthState
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Web
 
 <div class="dashboard-container">
 
@@ -12,7 +14,14 @@
         <div class="dashboard-subtitle">View your favorites & explore forecasts</div>
     </div>
 
-    <!-- Error Box -->
+    @if (!string.IsNullOrWhiteSpace(popupMessage))
+    {
+        <div class="auth-message-box popup-success" style="margin-top:14px;">
+            <span class="msg-icon">✅</span>
+            @popupMessage
+        </div>
+    }
+
     @if (!string.IsNullOrWhiteSpace(dashboardError))
     {
         <div class="auth-message-box error" style="margin-top:18px;">
@@ -21,7 +30,6 @@
         </div>
     }
 
-    <!-- Favorites chips -->
     <div class="glass-card favorites-box animate-pop-in">
         <h3>Your Favorites</h3>
         @if (favoriteCities.Count == 0)
@@ -42,23 +50,22 @@
         }
     </div>
 
-    <!-- Search favorites -->
     <div class="search-hero animate-fade-in">
-        <input class="search-input" @bind="city" placeholder="Enter city name..." />
+        <input class="search-input" @bind="city" placeholder="Enter city name..." @onkeydown="HandleSearchEnter" />
         <button class="btn-search" @onclick="GetWeather">Search</button>
         <button class="btn-fav" @onclick="AddFavorite">Add Fav</button>
         <button class="btn-location" @onclick="@(async () => await ManualLocationLoad())">
             <span class="material-icons" style="vertical-align:middle;">my_location</span> Get My Location
         </button>
+        <button class="btn-compare-nav" @onclick="GoToCompare" style="margin-left:18px;">Compare Cities</button>
     </div>
 
     @if (currentWeather != null)
     {
-        <!-- Dashboard weather display -->
         <div class="dashboard-hero animate-hero"
              style="background-image:
-                        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-                        url('@GetWeatherBackgroundImage()');">
+                                linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                                url('@GetWeatherBackgroundImage()');">
             <div class="hero-left">
                 <h1>@currentWeather.City</h1>
                 <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
@@ -72,7 +79,6 @@
                 <div class="temp">@currentWeather.Temp°C</div>
             </div>
         </div>
-        <!-- Forecast -->
         <h3 class="forecast-title">5-Day Forecast</h3>
         <div class="forecast-grid">
             @foreach (var day in forecastList)
@@ -85,72 +91,8 @@
                 </div>
             }
         </div>
-
-        <!-- Comparison Feature (below forecast) -->
-        <div class="comparison-section glass-card animate-pop-in" style="margin-top:28px;">
-            <h3 style="margin-bottom:1.3rem; color:#fff; font-size:1.38rem; font-weight:600;">Compare Two Cities</h3>
-            <div class="compare-row" style="margin-bottom:1.1rem;">
-                <div class="compare-input-group">
-                    <input placeholder="City 1" @bind="city1" class="compare-input" autocomplete="off" />
-                    <span class="dropdown-arrow" @onclick="() => ToggleFavDropdown(1)">▼</span>
-                    @if (showFavDropdown1 && favoriteCities.Any())
-                    {
-                        <ul class="dropdown-list">
-                            @foreach (var fav in favoriteCities)
-                            {
-                                <li @onclick="() => SelectFav(1, fav)">@fav</li>
-                            }
-                        </ul>
-                    }
-                </div>
-                <div class="compare-input-group">
-                    <input placeholder="City 2" @bind="city2" class="compare-input" autocomplete="off" />
-                    <span class="dropdown-arrow" @onclick="() => ToggleFavDropdown(2)">▼</span>
-                    @if (showFavDropdown2 && favoriteCities.Any())
-                    {
-                        <ul class="dropdown-list">
-                            @foreach (var fav in favoriteCities)
-                            {
-                                <li @onclick="() => SelectFav(2, fav)">@fav</li>
-                            }
-                        </ul>
-                    }
-                </div>
-                <button class="btn-compare-table" @onclick="CompareCities" disabled="@isComparing">Compare</button>
-            </div>
-            @if (compareWeather1 != null && compareWeather2 != null)
-            {
-                <table class="comparison-table" style="width:100%;text-align:center;">
-                    <tr>
-                        <th style="width:28%;"></th>
-                        <th>@compareWeather1.City</th>
-                        <th>@compareWeather2.City</th>
-                    </tr>
-                    <tr>
-                        <td>Temperature</td>
-                        <td>@compareWeather1.Temp&nbsp;°C</td>
-                        <td>@compareWeather2.Temp&nbsp;°C</td>
-                    </tr>
-                    <tr>
-                        <td>Condition</td>
-                        <td>@compareWeather1.Description</td>
-                        <td>@compareWeather2.Description</td>
-                    </tr>
-                    <tr>
-                        <td>Wind</td>
-                        <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
-                        <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
-                    </tr>
-                </table>
-            }
-        </div>
     }
 </div>
-
-@if (!string.IsNullOrEmpty(popupMessage))
-{
-    <div class="popup">@popupMessage</div>
-}
 
 @code {
     private string city = "";
@@ -162,45 +104,6 @@
 
     private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
 
-    // For comparison section
-    private string city1 = "";
-    private string city2 = "";
-    private WeatherData? compareWeather1;
-    private WeatherData? compareWeather2;
-    private bool isComparing = false;
-
-    // Dropdowns for compare inputs
-    private bool showFavDropdown1 = false;
-    private bool showFavDropdown2 = false;
-
-    private void ToggleFavDropdown(int which)
-    {
-        if (which == 1)
-        {
-            showFavDropdown1 = !showFavDropdown1;
-            showFavDropdown2 = false;
-        }
-        else
-        {
-            showFavDropdown2 = !showFavDropdown2;
-            showFavDropdown1 = false;
-        }
-    }
-
-    private void SelectFav(int which, string city)
-    {
-        if (which == 1)
-        {
-            city1 = city;
-            showFavDropdown1 = false;
-        }
-        else
-        {
-            city2 = city;
-            showFavDropdown2 = false;
-        }
-    }
-
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(AuthState.UserId))
@@ -208,10 +111,34 @@
         await TryGeoLoadDashboard();
     }
 
+    private async Task HandleSearchEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await GetWeather();
+        }
+    }
+
+    private void GoToCompare() => Navigation.NavigateTo("/compare");
+
+    // Background image method (the missing one!)
+    private string GetWeatherBackgroundImage()
+    {
+        if (currentWeather == null) return "/images/weather/cloudy.jpg";
+        var desc = (currentWeather.Description ?? "").ToLowerInvariant();
+        var main = (currentWeather.Main ?? "").ToLowerInvariant();
+        if (desc.Contains("rain") || main == "rain" || main == "drizzle") return "/images/weather/rainy.jpg";
+        if (desc.Contains("cloud") || main == "clouds") return "/images/weather/cloudy.jpg";
+        if (desc.Contains("clear") || main == "clear" || desc.Contains("sun")) return "/images/weather/sunny.jpg";
+        if (desc.Contains("snow") || main == "snow") return "/images/weather/snowy.jpg";
+        if (desc.Contains("fog") || desc.Contains("mist") || desc.Contains("haze")) return "/images/weather/foggy.jpg";
+        if (desc.Contains("storm") || desc.Contains("thunder") || main == "thunderstorm") return "/images/weather/storm.jpg";
+        return "/images/weather/cloudy.jpg";
+    }
+
     // On load: get user city and auto-search
     private async Task TryGeoLoadDashboard()
     {
-        // (Optionally clear error)
         dashboardError = null;
         try
         {
@@ -225,10 +152,7 @@
                 await GetWeather();
             }
         }
-        catch
-        {
-            // Fail silently on first app load.
-        }
+        catch { }
     }
 
     private async Task ManualLocationLoad()
@@ -237,7 +161,6 @@
         try
         {
             var coords = await JS.InvokeAsync<LatLong>("getGeolocation");
-
             var geoUrl = $"https://api.openweathermap.org/geo/1.0/reverse?lat={coords.Latitude}&lon={coords.Longitude}&limit=1&appid={ApiKey}";
             var geoResults = await Http.GetFromJsonAsync<List<GeoResult>>(geoUrl);
             var detectedCity = geoResults?.FirstOrDefault()?.name?.Split(' ')[0] ?? null;
@@ -352,57 +275,6 @@
         }
     }
 
-    // Comparison section logic
-    private async Task CompareCities()
-    {
-        isComparing = true;
-        compareWeather1 = await FetchWeatherForComparison(city1);
-        compareWeather2 = await FetchWeatherForComparison(city2);
-        isComparing = false;
-    }
-    private async Task<WeatherData?> FetchWeatherForComparison(string cityName)
-    {
-        try
-        {
-            var url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={ApiKey}&units=metric";
-            var data = await Http.GetFromJsonAsync<WeatherApiResponse>(url);
-
-            if (data != null && data.Weather.Any())
-            {
-                return new WeatherData
-                {
-                    City = data.Name,
-                    Temp = data.Main.Temp,
-                    Description = data.Weather[0].Description,
-                    WindSpeed = data.Wind.Speed,
-                    Main = data.Weather[0].Main,
-                    IconId = data.Weather[0].Icon
-                };
-            }
-        }
-        catch
-        {
-        }
-        return null;
-    }
-
-    private string GetWeatherBackgroundImage()
-    {
-        if (currentWeather == null) return "/images/weather/cloudy.jpg";
-
-        var desc = (currentWeather.Description ?? "").ToLowerInvariant();
-        var main = (currentWeather.Main ?? "").ToLowerInvariant();
-
-        if (desc.Contains("rain") || main == "rain" || main == "drizzle") return "/images/weather/rainy.jpg";
-        if (desc.Contains("cloud") || main == "clouds") return "/images/weather/cloudy.jpg";
-        if (desc.Contains("clear") || main == "clear" || desc.Contains("sun")) return "/images/weather/sunny.jpg";
-        if (desc.Contains("snow") || main == "snow") return "/images/weather/snowy.jpg";
-        if (desc.Contains("fog") || desc.Contains("mist") || desc.Contains("haze")) return "/images/weather/foggy.jpg";
-        if (desc.Contains("storm") || desc.Contains("thunder") || main == "thunderstorm") return "/images/weather/storm.jpg";
-
-        return "/images/weather/cloudy.jpg";
-    }
-
     private async Task AddFavorite()
     {
         dashboardError = null;
@@ -473,7 +345,7 @@
         });
     }
 
-    // Models...
+    // Models
     private class WeatherData
     {
         public string City { get; set; } = "";

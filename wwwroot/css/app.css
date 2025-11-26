@@ -642,6 +642,17 @@ body {
         font-size: 2.4rem;
         font-weight: 700;
     }
+.auth-message-box.popup-success, .auth-message-box.success {
+    background: rgba(25,163,102,0.13);
+    color: #19a366;
+    border-left-color: #19a366;
+}
+
+.auth-message-box .msg-icon {
+    font-size: 1.32rem;
+    margin-right: 8px;
+    vertical-align: middle;
+}
 
 /* =====================================================
    FAVORITES — Modern "chips" style

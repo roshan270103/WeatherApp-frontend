@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @using Weatherfrontend.Services
+@using Microsoft.AspNetCore.Components.Web
 @inject AuthState authState
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
@@ -9,8 +10,8 @@
         <h2>Welcome Back 👋</h2>
         <p class="auth-subtitle">Login to continue to your weather dashboard</p>
 
-        <input class="auth-input" @bind="email" placeholder="Email" />
-        <input class="auth-input" @bind="password" type="password" placeholder="Password" />
+        <input class="auth-input" @bind="email" placeholder="Email" @onkeydown="HandleLoginEnter" />
+        <input class="auth-input" @bind="password" type="password" placeholder="Password" @onkeydown="HandleLoginEnter" />
 
         <button class="auth-btn" @onclick="LoginUser">Login</button>
 
@@ -53,6 +54,14 @@
         {
             var errorMsg = await response.Content.ReadAsStringAsync();
             message = GetFriendlyErrorMessage(errorMsg);
+        }
+    }
+
+    private async Task HandleLoginEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoginUser();
         }
     }
 
