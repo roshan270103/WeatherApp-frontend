@@ -67,18 +67,22 @@
 
 @if (forecastDays != null && forecastDays.Any())
 {
-    <h3 class="forecast-title animate-fade-in">3-Day Forecast</h3>
-    <div class="forecast-grid">
-        @foreach (var day in forecastDays)
-        {
-            <div class="forecast-card animate-pop-in">
-                <img src="@($"https://openweathermap.org/img/wn/{day.Icon}@2x.png")" />
-                <div class="forecast-date">@day.Date.ToString("ddd")</div>
-                <div class="forecast-temp">@day.MinTemp°C – @day.MaxTemp°C</div>
-                <div class="forecast-desc">@day.Description</div>
-            </div>
-        }
+    <div style="margin-top:18px;">
+        <h3 class="forecast-title animate-fade-in">3-Day Forecast</h3>
+        <div class="forecast-grid">
+            @foreach (var day in forecastDays)
+            {
+                <div class="forecast-card animate-pop-in">
+                    <img src="@($"https://openweathermap.org/img/wn/{day.Icon}@2x.png")" />
+                    <div class="forecast-date">@day.Date.ToString("ddd")</div>
+                    <div class="forecast-temp">@day.MinTemp°C – @day.MaxTemp°C</div>
+                    <div class="forecast-desc">@day.Description</div>
+                </div>
+            }
+        </div>
     </div>
+}
+
 }
 
 @if (!string.IsNullOrWhiteSpace(error))

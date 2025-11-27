@@ -774,16 +774,12 @@ body {
    ===================================================== */
 
 .forecast-title {
-    margin-top: 30px;
+    margin-top: 10px; /* smaller than before */
     margin-bottom: 12px;
-    font-size: 1.4rem;
 }
 
 .forecast-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* can make even 110px for more cards per row if wanted */
-    gap: 4px; /* <= THIS controls the gap -- use 2px or 4px or even 0px for super tight */
-    margin-bottom: 40px;
+    margin-top: 0; /* remove extra top gap */
 }
 
 
