@@ -4,6 +4,7 @@
 @inject AuthState authState
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <div class="auth-wrapper">
     <div class="auth-card">
@@ -26,6 +27,12 @@
     private string email = "";
     private string password = "";
     private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // This sets the browser tab title for the login page
+        await JS.InvokeVoidAsync("setTitle", "Login - Weatherfrontend");
+    }
 
     private async Task LoginUser()
     {
@@ -69,12 +76,10 @@
     {
         try
         {
-            // Try to parse standard backend error format
             var doc = System.Text.Json.JsonDocument.Parse(rawJson);
             if (doc.RootElement.TryGetProperty("msg", out var msgElem))
                 return msgElem.GetString();
 
-            // Fallback for "error_code" or similar
             if (rawJson.Contains("invalid_credentials"))
                 return "Invalid email or password. Please try again.";
             if (rawJson.Contains("missing email"))
@@ -84,10 +89,8 @@
         }
         catch
         {
-            // Fallback for any non-JSON error
         }
 
-        // As default fallback:
         if (rawJson.Contains("invalid_credentials"))
             return "Invalid email or password. Please try again.";
         if (rawJson.Contains("missing email"))

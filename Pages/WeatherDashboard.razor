@@ -106,9 +106,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await JS.InvokeVoidAsync("setTitle", "Dashboard - Weatherfrontend");
         if (!string.IsNullOrEmpty(AuthState.UserId))
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         await TryGeoLoadDashboard();
+
     }
 
     private async Task HandleSearchEnter(KeyboardEventArgs e)

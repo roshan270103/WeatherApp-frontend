@@ -1,6 +1,7 @@
 ﻿@page "/register"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 @using Microsoft.AspNetCore.Components.Web
 
 <div class="auth-wrapper">
@@ -31,6 +32,11 @@
     private string password = "";
     private string confirmPassword = "";
     private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JS.InvokeVoidAsync("setTitle", "Register - Weatherfrontend");
+    }
 
     private async Task RegisterUser()
     {

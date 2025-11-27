@@ -116,6 +116,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await JS.InvokeVoidAsync("setTitle", "Dashboard - Weatherfrontend");
         if (!IsAuthenticated)
         {
             var data = await JS.InvokeAsync<SearchData>("getSearchData");

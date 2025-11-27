@@ -30,6 +30,10 @@
             await JS.InvokeVoidAsync("setBodyClass", bgClass);
         }
     }
+    private async Task SetPageTitle(string title)
+    {
+        await JS.InvokeVoidAsync("eval", $"document.title = '{title.Replace("'", "\\'")}'");
+    }
 
     /* ✅ BODY BACKGROUND: Light animated gradients */
     private string GetWeatherBackgroundClass()
