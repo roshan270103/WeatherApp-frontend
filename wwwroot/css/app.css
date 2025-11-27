@@ -165,7 +165,17 @@ body {
 /* ================================
    FORECAST CARDS added new 
    ================================ */
+.home-forecast-block {
+    margin-top: 18px;
+}
 
+/* Same as dashboard forecast grid */
+.forecast-grid {
+    display: flex;
+    gap: 18px;
+    margin-top: 0;
+    flex-wrap: nowrap; /* or wrap if you want responsive rows */
+}
 .forecast-container {
     margin: 30px auto;
     display: flex;
