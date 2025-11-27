@@ -66,10 +66,13 @@
     {
         <div class="dashboard-hero animate-hero"
              style="background-image:
-                                linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-                                url('@GetWeatherBackgroundImage()');">
+                                    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                                    url('@GetWeatherBackgroundImage()');">
             <div class="hero-left">
-                <h1>@currentWeather.City</h1>
+                <h1>
+                    @currentWeather.City
+                    @(string.IsNullOrWhiteSpace(currentWeather.Country) ? "" : $", {currentWeather.Country}")
+                </h1>
                 <div class="hero-date">@DateTime.Now.ToString("dddd, MMM dd yyyy · hh:mm tt")</div>
                 <div class="hero-info-row">
                     <div class="hero-info-pill">Wind @currentWeather.WindSpeed m/s</div>
@@ -101,8 +104,9 @@
     private WeatherData? currentWeather;
     private List<ForecastData> forecastList = new();
     private List<string> favoriteCities = new();
-    private string? popupMessage;
     private string dashboardError;
+    private string? popupMessage;
+    private CancellationTokenSource? popupCts;
 
     private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
 
@@ -112,7 +116,6 @@
         if (!string.IsNullOrEmpty(AuthState.UserId))
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         await TryGeoLoadDashboard();
-
     }
 
     private async Task HandleSearchEnter(KeyboardEventArgs e)
@@ -125,7 +128,6 @@
 
     private void GoToCompare() => Navigation.NavigateTo("/compare");
 
-    // Background image method (the missing one!)
     private string GetWeatherBackgroundImage()
     {
         if (currentWeather == null) return "/images/weather/cloudy.jpg";
@@ -140,7 +142,6 @@
         return "/images/weather/cloudy.jpg";
     }
 
-    // On load: get user city and auto-search
     private async Task TryGeoLoadDashboard()
     {
         dashboardError = null;
@@ -229,6 +230,7 @@
                 currentWeather = new WeatherData
                 {
                     City = data.Name,
+                    Country = data.Sys?.Country ?? "",
                     Temp = data.Main.Temp,
                     Description = data.Weather[0].Description,
                     IconId = data.Weather[0].Icon,
@@ -288,7 +290,6 @@
             return;
         }
 
-        // Validate the city exists first
         try
         {
             var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={ApiKey}&units=metric";
@@ -314,7 +315,7 @@
         }
         else
         {
-            popupMessage = $"✅ Added {city}";
+            ShowPopup($"✅ Added {city}");
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         }
     }
@@ -324,7 +325,7 @@
         var ok = await FavoritesService.RemoveFavoriteAsync(fav);
         if (ok)
         {
-            popupMessage = $"🗑 Removed {fav}";
+            ShowPopup($"🗑 Removed {fav}");
             favoriteCities = await FavoritesService.GetFavoritesAsync();
         }
     }
@@ -339,13 +340,26 @@
     private void ShowPopup(string message)
     {
         popupMessage = message;
+        popupCts?.Cancel();
+        popupCts = new CancellationTokenSource();
+        var token = popupCts.Token;
+
         StateHasChanged();
 
         _ = Task.Run(async () =>
         {
-            await Task.Delay(2500);
-            popupMessage = null;
-            StateHasChanged();
+            try
+            {
+                await Task.Delay(2500, token);
+                if (!token.IsCancellationRequested)
+                {
+                    popupMessage = null;
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
         });
     }
 
@@ -353,6 +367,7 @@
     private class WeatherData
     {
         public string City { get; set; } = "";
+        public string Country { get; set; } = "";
         public double Temp { get; set; }
         public string Description { get; set; } = "";
         public string IconId { get; set; } = "";
@@ -372,12 +387,14 @@
         public MainData Main { get; set; } = new();
         public List<WeatherCondition> Weather { get; set; } = new();
         public WindData Wind { get; set; } = new();
+        public SysData Sys { get; set; } = new();
     }
     private class ForecastApiResponse { public List<ForecastItem> List { get; set; } = new(); }
     private class ForecastItem { public MainData Main { get; set; } = new(); public List<WeatherCondition> Weather { get; set; } = new(); public string Dt_txt { get; set; } = ""; }
     private class MainData { public double Temp { get; set; } }
     private class WeatherCondition { public string Main { get; set; } = ""; public string Description { get; set; } = ""; public string Icon { get; set; } = ""; }
     private class WindData { public double Speed { get; set; } }
+    private class SysData { public string Country { get; set; } = ""; }
     private class LatLong { public double Latitude { get; set; } public double Longitude { get; set; } }
     private class GeoResult { public string name { get; set; } }
 }
