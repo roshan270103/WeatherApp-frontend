@@ -1,6 +1,9 @@
 ﻿@page "/compare"
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject Weatherfrontend.Services.FavoritesService FavoritesService
+@inject Weatherfrontend.Services.AuthState AuthState
+@inject IJSRuntime JS
 @using Microsoft.AspNetCore.Components.Web
 
 <div class="compare-page-shell">
@@ -8,8 +11,40 @@
         <h2 class="compare-title">Compare Two Cities</h2>
 
         <div class="compare-row">
-            <input placeholder="City 1" @bind="city1" class="compare-input" @onkeydown="HandleCompareEnter" />
-            <input placeholder="City 2" @bind="city2" class="compare-input" @onkeydown="HandleCompareEnter" />
+            <div class="compare-input-group">
+                <input placeholder="City 1"
+                       @bind="city1"
+                       class="compare-input"
+                       @onkeydown="HandleCompareEnter" />
+                <span class="dropdown-arrow" @onclick="() => ToggleFavDropdown(1)">▼</span>
+                @if (showFavDropdown1 && favoriteCities.Any())
+                {
+                    <ul class="dropdown-list">
+                        @foreach (var fav in favoriteCities)
+                        {
+                            <li @onclick="() => SelectFav(1, fav)">@fav</li>
+                        }
+                    </ul>
+                }
+            </div>
+
+            <div class="compare-input-group">
+                <input placeholder="City 2"
+                       @bind="city2"
+                       class="compare-input"
+                       @onkeydown="HandleCompareEnter" />
+                <span class="dropdown-arrow" @onclick="() => ToggleFavDropdown(2)">▼</span>
+                @if (showFavDropdown2 && favoriteCities.Any())
+                {
+                    <ul class="dropdown-list">
+                        @foreach (var fav in favoriteCities)
+                        {
+                            <li @onclick="() => SelectFav(2, fav)">@fav</li>
+                        }
+                    </ul>
+                }
+            </div>
+
             <button class="btn-search" @onclick="PerformComparison" disabled="@isComparing">
                 Compare
             </button>
@@ -57,7 +92,6 @@
     </div>
 </div>
 
-
 @code {
     private string city1 = "";
     private string city2 = "";
@@ -67,11 +101,50 @@
     private string compareError;
     private const string ApiKey = "898c51e8b3072bda4577b3aff97c30e7";
 
+    private List<string> favoriteCities = new();
+    private bool showFavDropdown1 = false;
+    private bool showFavDropdown2 = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JS.InvokeVoidAsync("setTitle", "Compare - Weatherfrontend");
+        if (!string.IsNullOrEmpty(AuthState.UserId))
+            favoriteCities = await FavoritesService.GetFavoritesAsync();
+    }
+
     private async Task HandleCompareEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
             await PerformComparison();
+        }
+    }
+
+    private void ToggleFavDropdown(int which)
+    {
+        if (which == 1)
+        {
+            showFavDropdown1 = !showFavDropdown1;
+            showFavDropdown2 = false;
+        }
+        else
+        {
+            showFavDropdown2 = !showFavDropdown2;
+            showFavDropdown1 = false;
+        }
+    }
+
+    private void SelectFav(int which, string city)
+    {
+        if (which == 1)
+        {
+            city1 = city;
+            showFavDropdown1 = false;
+        }
+        else
+        {
+            city2 = city;
+            showFavDropdown2 = false;
         }
     }
 
