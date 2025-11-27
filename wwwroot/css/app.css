@@ -787,6 +787,28 @@ body {
 }
 
 
+.home-forecast-wrapper {
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    margin-top: 18px;
+}
+
+.home-forecast-block {
+    max-width: 900px; /* similar width as dashboard content */
+    width: 100%;
+}
+
+    .home-forecast-block .forecast-title {
+        margin-top: 0;
+        margin-bottom: 12px;
+    }
+
+    .home-forecast-block .forecast-grid {
+        display: flex;
+        gap: 18px;
+        justify-content: center; /* center cards under the title */
+        margin-top: 0;
+    }
 
 .forecast-card {
     background: rgba(255,255,255,0.18);
