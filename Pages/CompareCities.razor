@@ -3,47 +3,60 @@
 @inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Web
 
-<div class="compare-page-wrapper">
-    <h2 class="compare-title" style="margin-bottom: 1.2rem;">Compare Two Cities</h2>
-    <div class="compare-row" style="margin-bottom:1.1rem;">
-        <input placeholder="City 1" @bind="city1" class="compare-input" @onkeydown="HandleCompareEnter" />
-        <input placeholder="City 2" @bind="city2" class="compare-input" @onkeydown="HandleCompareEnter" />
-        <button class="btn-compare-table" @onclick="PerformComparison" disabled="@isComparing">Compare</button>
-        <button class="btn-back" @onclick="GoBack" style="margin-left: 16px;">Back to Dashboard</button>
-    </div>
-    @if (!string.IsNullOrWhiteSpace(compareError))
-    {
-        <div class="auth-message-box error" style="margin-top:18px;">
-            <span class="msg-icon">❌</span>
-            @compareError
+<div class="compare-page-shell">
+    <div class="compare-card glass-card animate-pop-in">
+        <h2 class="compare-title">Compare Two Cities</h2>
+
+        <div class="compare-row">
+            <input placeholder="City 1" @bind="city1" class="compare-input" @onkeydown="HandleCompareEnter" />
+            <input placeholder="City 2" @bind="city2" class="compare-input" @onkeydown="HandleCompareEnter" />
+            <button class="btn-search" @onclick="PerformComparison" disabled="@isComparing">
+                Compare
+            </button>
         </div>
-    }
-    @if (compareWeather1 != null && compareWeather2 != null)
-    {
-        <table class="comparison-table" style="width:100%;text-align:center;">
-            <tr>
-                <th></th>
-                <th>@compareWeather1.City</th>
-                <th>@compareWeather2.City</th>
-            </tr>
-            <tr>
-                <td>Temperature</td>
-                <td>@compareWeather1.Temp&nbsp;°C</td>
-                <td>@compareWeather2.Temp&nbsp;°C</td>
-            </tr>
-            <tr>
-                <td>Condition</td>
-                <td>@compareWeather1.Description</td>
-                <td>@compareWeather2.Description</td>
-            </tr>
-            <tr>
-                <td>Wind</td>
-                <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
-                <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
-            </tr>
-        </table>
-    }
+
+        @if (!string.IsNullOrWhiteSpace(compareError))
+        {
+            <div class="auth-message-box error" style="margin-top:14px;">
+                <span class="msg-icon">❌</span>
+                @compareError
+            </div>
+        }
+
+        @if (compareWeather1 != null && compareWeather2 != null)
+        {
+            <table class="comparison-table">
+                <tr>
+                    <th></th>
+                    <th>@compareWeather1.City</th>
+                    <th>@compareWeather2.City</th>
+                </tr>
+                <tr>
+                    <td>Temperature</td>
+                    <td>@compareWeather1.Temp&nbsp;°C</td>
+                    <td>@compareWeather2.Temp&nbsp;°C</td>
+                </tr>
+                <tr>
+                    <td>Condition</td>
+                    <td>@compareWeather1.Description</td>
+                    <td>@compareWeather2.Description</td>
+                </tr>
+                <tr>
+                    <td>Wind</td>
+                    <td>@compareWeather1.WindSpeed&nbsp;m/s</td>
+                    <td>@compareWeather2.WindSpeed&nbsp;m/s</td>
+                </tr>
+            </table>
+        }
+
+        <div style="margin-top:18px; text-align:right;">
+            <button class="btn-location" @onclick="GoBack" style="min-width:160px;">
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
 </div>
+
 
 @code {
     private string city1 = "";

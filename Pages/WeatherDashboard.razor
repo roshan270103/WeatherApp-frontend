@@ -57,7 +57,9 @@
         <button class="btn-location" @onclick="@(async () => await ManualLocationLoad())">
             <span class="material-icons" style="vertical-align:middle;">my_location</span> Get My Location
         </button>
-        <button class="btn-compare-nav" @onclick="GoToCompare" style="margin-left:18px;">Compare Cities</button>
+        <button class="btn-search" @onclick="GoToCompare" style="margin-left:18px; min-width:140px;">
+            Compare Cities
+        </button>
     </div>
 
     @if (currentWeather != null)

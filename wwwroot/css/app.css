@@ -1375,3 +1375,79 @@ body {
         line-height: 1;
     }
 
+.compare-page-shell {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 80px); /* adjust if needed for header */
+    padding-top: 40px;
+}
+
+.compare-card {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 26px;
+}
+
+.compare-title {
+    margin-bottom: 1.4rem;
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.compare-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.1rem;
+}
+
+.compare-input {
+    flex: 1;
+    border-radius: 14px;
+    padding: 10px 14px;
+    border: none;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+}
+
+    .compare-input::placeholder {
+        color: rgba(255,255,255,0.55);
+    }
+
+.comparison-table {
+    width: 100%;
+    text-align: center;
+    margin-top: 12px;
+    border-collapse: collapse;
+}
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 8px 10px;
+        color: #fff;
+    }
+.btn-compare {
+    border: none;
+    border-radius: 14px;
+    padding: 10px 20px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff7a5c, #ff4b8d); /* different color */
+    box-shadow: 0 8px 22px rgba(255, 75, 141, 0.45);
+    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, opacity 0.1s;
+}
+
+    .btn-compare:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 26px rgba(255, 75, 141, 0.6);
+        opacity: 0.96;
+    }
+
+    .btn-compare:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 14px rgba(255, 75, 141, 0.42);
+    }
