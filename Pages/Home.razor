@@ -67,7 +67,7 @@
 
 @if (forecastDays != null && forecastDays.Any())
 {
-    <div style="margin-top:18px;">
+    <div class="home-forecast-block">
         <h3 class="forecast-title animate-fade-in">3-Day Forecast</h3>
         <div class="forecast-grid">
             @foreach (var day in forecastDays)
@@ -82,6 +82,7 @@
         </div>
     </div>
 }
+
 
 
 
