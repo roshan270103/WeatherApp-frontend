@@ -790,7 +790,7 @@ body {
 .home-forecast-wrapper {
     display: flex;
     justify-content: center; /* centers horizontally */
-    margin-top: 18px;
+    margin-top: 10px;
 }
 
 .home-forecast-block {
